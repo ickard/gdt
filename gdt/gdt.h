@@ -72,7 +72,7 @@ typedef void (*touchhandler_t)(touch_type_t, int, int);
  *   - Load resources
  *   - Setup callbacks
  *   - If using threads, consider starting them
-       in gdt_hook_visible() rather then here
+ *     in gdt_hook_visible() rather then here
  *   - If you have saved game state, load it.
  */
 void gdt_hook_initialize(void);
@@ -184,5 +184,6 @@ long       gdt_resource_length(resource_t resource);
 resource_t gdt_resource_load  (const char* resourcePath);
 void       gdt_resource_unload(resource_t resource);
 
+// -------------------------------------
 
 #endif // gdt_h
