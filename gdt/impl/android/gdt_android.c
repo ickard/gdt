@@ -93,7 +93,7 @@ void Java_gdt_Native_render(JNIEnv* _, jclass __) {
 }
 
 void Java_gdt_Native_hide(JNIEnv* _, jclass __, jboolean exitToo) {
-  gdt_hook_hide(exitToo);
+  gdt_hook_hidden(exitToo);
   if (exitToo)
     gdt_hook_exit();
 }
@@ -168,7 +168,7 @@ void gdt_set_callback_touch(touchhandler_t on_touch)
 
 void gdt_log(log_type_t type, const char* tag, const char* format, ...) {
   int l = mapType(type);
-  //__android_log_print(mapType(type), tag, format, ...);
+  __android_log_print(mapType(type), tag, format);
 }
 
 void gdt_exit(exit_type_t type) {

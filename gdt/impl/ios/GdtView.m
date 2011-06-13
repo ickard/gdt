@@ -38,8 +38,6 @@ const char* pathPrefix;
 
 @implementation GdtView
 
-
-
 void gdt_ios_set_log_threshold(log_type_t treshold) {
     
 }

@@ -59,6 +59,10 @@ typedef struct resource* resource_t;
 
 typedef void (*touchhandler_t)(touch_type_t, int, int);
 
+#ifdef __cplusplus
+extern "C" {
+#endif // cplusplus
+
 /* --- gdt_hook_X functions ---
  *  Every "hook" listed here will need to be implemented by the user of the API.
  *
@@ -141,7 +145,6 @@ void gdt_hook_render(void);
 
 // ----------------------------
 
-
 /* --- gdt_set_callback_X functions ---
  *  Set callback that will recieve X events when the game is in foreground.
  *  Setting to NULL will unsubscribe the current listener (if any).
@@ -185,5 +188,9 @@ resource_t gdt_resource_load  (const char* resourcePath);
 void       gdt_resource_unload(resource_t resource);
 
 // -------------------------------------
+#ifdef __cplusplus
+}
+#endif // cplusplus
+
 
 #endif // gdt_h

@@ -24,6 +24,7 @@
 
 #include "gdt.h"
 
+
 void gdt_fatal(const char* tag, const char* format, ...) {
   // gdt_log ( LOG_FAIL, tag, ...)
   gdt_exit (EXIT_FAIL); 
