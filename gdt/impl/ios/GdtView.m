@@ -59,10 +59,10 @@ static NSString* logTypeToFormatString(log_type_t type) {
 
 void gdt_logv(log_type_t type, const char* tag, const char* format, va_list args) {
     if (type >= t) {
-        NSString* s = [NSString stringWithFormat: logTypeToFormatString(type), tag, format];
+        NSString* s = [NSString stringWithFormat:
+                       logTypeToFormatString(type), tag, format];
         
         NSLogv(s, args);     
-        //[s dealloc];
     }
 }
 
@@ -74,7 +74,10 @@ void gdt_exit(exit_type_t type) {
 
 
 void gdt_open_url(const char* url) {
+    NSString* s   = [NSString stringWithUTF8String: url];
+    NSURL*    u   = [NSURL URLWithString: s];
     
+    [[UIApplication sharedApplication] openURL: u];
 }
 
 
