@@ -145,4 +145,8 @@ final class Native {
   static void setVirtualKeyboardMode(int mode) {
     
   }
+  
+  static void gcCollect() {
+    System.gc();
+  }
 }

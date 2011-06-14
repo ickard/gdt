@@ -38,12 +38,15 @@ struct resource {
 const char* openAssetSig = "(Ljava/lang/String;)[Ljava/lang/Object;";
 const char* cleanAssetSig = "(Ljava/lang/Object;)Z";
 const char* openUrlSig = "(Ljava/lang/String;)V";
+const char* gcCollectSig = "()V";
+
 touchhandler_t cb_touch = null;
 jclass cls;
 JNIEnv* env;
 jmethodID loadAsset;
 jmethodID openUrl;
 jmethodID cleanAsset;
+jmethodID gcCollect;
 int _screenHeight;
 
 static touch_type_t mapAction (int what) {
@@ -83,6 +86,7 @@ void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz) {
     loadAsset = (*env)->GetStaticMethodID(env, cls, "openAsset", openAssetSig);
     cleanAsset = (*env)->GetStaticMethodID(env, cls, "cleanAsset", cleanAssetSig);
     openUrl = (*env)->GetStaticMethodID(env, cls, "openUrl", openUrlSig);
+    gcCollect = (*env)->GetStaticMethodID(env, cls, "gcCollect", gcCollectSig);
 
     gdt_hook_initialize();
   }
@@ -176,7 +180,7 @@ void gdt_exit(exit_type_t type) {
 }
 
 void gdt_android_gc_collect() {
-  
+    (*env)->CallStaticObjectMethod(env, cls, gcCollect);
 }
 
 
