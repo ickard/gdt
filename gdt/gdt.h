@@ -25,6 +25,9 @@
 #ifndef gdt_h
 #define gdt_h
 
+#include <stdarg.h>
+
+
 typedef int boolean;
 #define true 1
 #define false 0
@@ -42,7 +45,7 @@ typedef enum {
   TOUCH_MOVE
 } touch_type_t;
 
-typedef enum {
+typedef enum { // The order is important, see gdt_ios_set_log_threshold()
   LOG_DEBUG,
   LOG_NORMAL,
   LOG_WARNING,
@@ -158,8 +161,11 @@ void gdt_set_callback_touch(touchhandler_t on_touch);
 // --- Misc. utility functions ---
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);
 void gdt_open_url                 (const char* url);
+    
 void gdt_log                      (log_type_t type,    const char* tag,
                                    const char* format, ...);
+void gdt_logv                     (log_type_t type,    const char* tag,
+                                   const char* format, va_list args);
 
 // Log (as LOG_ERROR), and then exit with EXIT_FAIL
 void gdt_fatal(const char* tag, const char* format, ...);

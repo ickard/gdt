@@ -165,10 +165,8 @@ void gdt_set_callback_touch(touchhandler_t on_touch)
   cb_touch = on_touch;
 }
 
-
-void gdt_log(log_type_t type, const char* tag, const char* format, ...) {
-  int l = mapType(type);
-  __android_log_print(mapType(type), tag, format);
+void gdt_logv(log_type_t type, const char* tag, const char* format, va_list args) {
+    __android_log_vprint(mapType(type), tag, format, args);
 }
 
 void gdt_exit(exit_type_t type) {

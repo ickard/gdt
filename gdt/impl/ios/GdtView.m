@@ -31,30 +31,42 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <stdio.h>
 
 touchhandler_t touch_cb = NULL;
 int __h;
 const char* pathPrefix;
+log_type_t t = LOG_WARNING;
 
 @implementation GdtView
 
+
+
 void gdt_ios_set_log_threshold(log_type_t treshold) {
-    
+    t = treshold;
 }
 
-void gdt_log(log_type_t type, const char* tag, const char* format, ...) {
+static NSString* logTypeToFormatString(log_type_t type) {
     switch(type) {
         case LOG_ERROR:
-            NSLog(@"%s: [error] %s", tag, format);
-            break;
+            return @"%s: [error] %s";
         case LOG_WARNING:
-            NSLog(@"%s: [warning] %s", tag, format);
-            break;
+            return @"%s: [warning] %s";
         case LOG_DEBUG:
-            NSLog(@"%s: [debug] %s", tag, format);
-            break;
+            return @"%s: [debug] %s";
+    } 
+}
+
+void gdt_logv(log_type_t type, const char* tag, const char* format, va_list args) {
+    if (type >= t) {
+        NSString* s = [NSString stringWithFormat: logTypeToFormatString(type), tag, format];
+        
+        NSLogv(s, args);     
+        //[s dealloc];
     }
 }
+
+
 
 void gdt_exit(exit_type_t type) {
     [NSThread exit];
