@@ -113,7 +113,7 @@ void gdt_hook_visible(int width, int height) {
   glClearColor(0.4, 0.8, 0.4, 1);
 }
 
-void gdt_hook_hidden(boolean exiting) {
+void gdt_hook_hide(boolean exiting) {
 
 }
 
