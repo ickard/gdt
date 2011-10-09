@@ -58,6 +58,7 @@ public abstract class GdtActivity extends Activity {
   protected void onPause() {
     super.onPause();
     _view.onPause();
+	  Native.hide(false);
   }
   @Override
   protected void onResume() {

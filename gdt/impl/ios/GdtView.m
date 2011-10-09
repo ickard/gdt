@@ -24,6 +24,7 @@
 
 #import "GdtView.h"
 #include "gdt.h"
+#include "gdt_ios.h"
 #import <OpenGLES/EAGLDrawable.h> 
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
@@ -36,7 +37,7 @@
 touchhandler_t touch_cb = NULL;
 int __h;
 const char* pathPrefix;
-log_type_t t = LOG_WARNING;
+log_type_t t = LOG_DEBUG;
 
 @implementation GdtView
 

@@ -26,6 +26,7 @@
 #define gdt_h
 
 #include <stdarg.h>
+#include <stdint.h>
 
 
 typedef int boolean;
@@ -159,6 +160,10 @@ void gdt_set_callback_touch(touchhandler_t on_touch);
 
 
 // --- Misc. utility functions ---
+/**
+ * Return the time in nanoseconds at the highest precision available.
+ */
+uint64_t gdt_time_ns(void);
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);
 void gdt_open_url                 (const char* url);
     
