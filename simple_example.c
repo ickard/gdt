@@ -2,6 +2,7 @@
  * simple_example.c
  *
  * Copyright (c) 2011 Rickard Edström
+ * Copyright (c) 2011 Sebastian Ärleryd
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -113,7 +114,7 @@ void gdt_hook_visible(int width, int height) {
   glClearColor(0.4, 0.8, 0.4, 1);
 }
 
-void gdt_hook_hide(boolean exiting) {
+void gdt_hook_hidden(boolean exiting) {
 
 }
 

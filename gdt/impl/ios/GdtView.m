@@ -2,6 +2,7 @@
  * GdtView.m
  *
  * Copyright (c) 2011 Rickard Edström
+ * Copyright (c) 2011 Sebastian Ärleryd
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +25,7 @@
 
 #import "GdtView.h"
 #include "gdt.h"
+#include "gdt_ios.h"
 #import <OpenGLES/EAGLDrawable.h> 
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
@@ -36,7 +38,7 @@
 touchhandler_t touch_cb = NULL;
 int __h;
 const char* pathPrefix;
-log_type_t t = LOG_WARNING;
+log_type_t t = LOG_DEBUG;
 
 @implementation GdtView
 
