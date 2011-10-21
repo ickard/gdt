@@ -27,6 +27,4 @@
 
 #include "gdt.h"
 
-void gdt_android_gc_collect();
-
 #endif // gdt_android_h

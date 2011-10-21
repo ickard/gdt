@@ -179,7 +179,7 @@ void gdt_exit(exit_type_t type) {
   // EXIT_FAIL should_--> "app has encountered error"
 }
 
-void gdt_android_gc_collect() {
+void gdt_gc_hint(void) {
     (*env)->CallStaticObjectMethod(env, cls, gcCollect);
 }
 

@@ -128,6 +128,10 @@ void gdt_resource_unload(resource_t resource) {
     free(resource);
 }
 
+void gdt_gc_hint(void) {
+}
+
+
 -(id)initWithFrame:(CGRect)frame
 {
     pathPrefix = [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSASCIIStringEncoding];

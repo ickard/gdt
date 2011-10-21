@@ -161,9 +161,14 @@ void gdt_set_callback_touch(touchhandler_t on_touch);
 
 
 // --- Misc. utility functions ---
-/**
- * Return the time in nanoseconds at the highest precision available.
+
+
+/* gdt_gc_hint -- A hint to the underlying OS that now would be a good time to do a garbage collection.
+ * On platforms which does not use garbage collection, this does not do anything (no-op)
  */
+void gdt_gc_hint(void);
+
+// Return the time in nanoseconds at the highest precision available.
 uint64_t gdt_time_ns(void);
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);
 void gdt_open_url                 (const char* url);
