@@ -2,6 +2,7 @@
  * gdt_android.c
  *
  * Copyright (c) 2011 Rickard Edström
+ * Copyright (c) 2011 Sebastian Ärleryd
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +28,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "gdt_android.h"
+#include "sys/time.h"
+
 
 struct resource {
   void* ptr;
@@ -183,4 +186,9 @@ void gdt_gc_hint(void) {
     (*env)->CallStaticObjectMethod(env, cls, gcCollect);
 }
 
+uint64_t gdt_time_ns(void) {
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	return (uint64_t) now.tv_sec * 1000000000LL + (uint64_t) now.tv_nsec;
+}
 

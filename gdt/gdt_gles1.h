@@ -25,10 +25,14 @@
 #ifndef gles1_h
 #define gles1_h
 
-#ifdef ANDROID
+#include "gdt.h"
+
+#ifdef GDT_PLATFORM_ANDROID
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-#else
+#endif
+
+#ifdef GDT_PLATFORM_IOS
 #include <OpenGLES/ES1/gl.h>
 #include <OpenGLES/ES1/glext.h>
 #endif

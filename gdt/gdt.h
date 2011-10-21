@@ -30,6 +30,14 @@
 #include <stdint.h>
 
 
+#ifdef __APPLE__
+#define GDT_PLATFORM_IOS
+#endif
+
+#ifdef ANDROID
+#define GDT_PLATFORM_ANDROID
+#endif
+
 typedef int boolean;
 #define true 1
 #define false 0

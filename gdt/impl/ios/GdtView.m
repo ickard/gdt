@@ -123,6 +123,11 @@ void gdt_resource_unload(resource_t resource) {
 void gdt_gc_hint(void) {
 }
 
+uint64_t gdt_time_ns(void) {
+    struct timeval now;
+	gettimeofday(&now, NULL);
+    return (uint64_t) now.tv_sec * 1000000000LL + (uint64_t) now.tv_usec * 1000LL;
+}
 
 -(id)initWithFrame:(CGRect)frame
 {
