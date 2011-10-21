@@ -47,7 +47,7 @@ typedef enum {
   TOUCH_MOVE
 } touch_type_t;
 
-typedef enum { // The order is important, see gdt_ios_set_log_threshold()
+typedef enum {
   LOG_DEBUG,
   LOG_NORMAL,
   LOG_WARNING,

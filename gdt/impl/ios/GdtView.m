@@ -38,15 +38,9 @@
 touchhandler_t touch_cb = NULL;
 int __h;
 const char* pathPrefix;
-log_type_t t = LOG_DEBUG;
 
 @implementation GdtView
 
-
-
-void gdt_ios_set_log_threshold(log_type_t treshold) {
-    t = treshold;
-}
 
 static NSString* logTypeToFormatString(log_type_t type) {
     switch(type) {
@@ -60,12 +54,10 @@ static NSString* logTypeToFormatString(log_type_t type) {
 }
 
 void gdt_logv(log_type_t type, const char* tag, const char* format, va_list args) {
-    if (type >= t) {
-        NSString* s = [NSString stringWithFormat:
+    NSString* s = [NSString stringWithFormat:
                        logTypeToFormatString(type), tag, format];
         
-        NSLogv(s, args);     
-    }
+    NSLogv(s, args);     
 }
 
 

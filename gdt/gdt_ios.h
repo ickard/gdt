@@ -27,9 +27,4 @@
 
 #include "gdt.h"
 
-// The only levels printed will be the specified and the levels above
-// (more serious) than the one specified.
-// Default value: LOG_WARNING
-void gdt_ios_set_log_threshold(log_type_t treshold);
-
 #endif // gdt_ios_h
