@@ -34,16 +34,16 @@
 struct resource {
   void* ptr;
   jobject extra;
-  long length;
+  int32_t length;
 };
 
 
-const char* openAssetSig = "(Ljava/lang/String;)[Ljava/lang/Object;";
-const char* cleanAssetSig = "(Ljava/lang/Object;)Z";
-const char* openUrlSig = "(Ljava/lang/String;)V";
-const char* gcCollectSig = "()V";
+string_t openAssetSig = "(Ljava/lang/String;)[Ljava/lang/Object;";
+string_t cleanAssetSig = "(Ljava/lang/Object;)Z";
+string_t openUrlSig = "(Ljava/lang/String;)V";
+string_t gcCollectSig = "()V";
 
-touchhandler_t cb_touch = null;
+touchhandler_t cb_touch = NULL;
 jclass cls;
 JNIEnv* env;
 jmethodID loadAsset;
@@ -80,7 +80,7 @@ static int mapType(log_type_t type) {
 
 
 void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz) {
-  static boolean initialized = false;
+  static bool initialized = false;
   if (!initialized) {
     initialized = true;
 
@@ -122,7 +122,7 @@ void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
 
 }
 
-void gdt_open_url(const char* url) {
+void gdt_open_url(string_t url) {
   (*env)->CallStaticObjectMethod(env, cls, openUrl, (*env)->NewStringUTF(env, url) );
 }
 
@@ -130,15 +130,15 @@ void* gdt_resource_bytes(resource_t res) {
   return res->ptr;
 }
 
-long gdt_resource_length(resource_t res) {
+int32_t gdt_resource_length(resource_t res) {
   return res->length;
 }
 
-resource_t gdt_resource_load(const char* p) {
-  if (p == null || p[0] != '/')
-    return null;
+resource_t gdt_resource_load(string_t p) {
+  if (p == NULL || p[0] != '/')
+    return NULL;
 
-  const char* path = p+1;
+  string_t path = p+1;
 
   jobject arr = (*env)->NewGlobalRef(env,
                   (*env)->CallStaticObjectMethod(env, cls, loadAsset,
@@ -172,7 +172,7 @@ void gdt_set_callback_touch(touchhandler_t on_touch)
   cb_touch = on_touch;
 }
 
-void gdt_logv(log_type_t type, const char* tag, const char* format, va_list args) {
+void gdt_logv(log_type_t type, string_t tag, string_t format, va_list args) {
     __android_log_vprint(mapType(type), tag, format, args);
 }
 

@@ -38,10 +38,13 @@
 #define GDT_PLATFORM_ANDROID
 #endif
 
-typedef int boolean;
+#ifndef __cplusplus
+typedef int bool;
 #define true 1
 #define false 0
-#define null NULL
+#endif
+
+typedef const char* string_t;
 
 typedef enum {
   KBD_HIDDEN,
@@ -122,7 +125,7 @@ void gdt_hook_exit(void);
  *   glOrtof(...);
  *   glMatrixMode(...);
  */
-void gdt_hook_visible(int surfaceWidth, int surfaceHeight);
+void gdt_hook_visible(int32_t surfaceWidth, int32_t surfaceHeight);
 
 /* gdt_hook_hidden -- The game is going to the background or exiting
  * and the OpenGL ES surface is now gone
@@ -138,7 +141,7 @@ void gdt_hook_visible(int surfaceWidth, int surfaceHeight);
  *     so the player can touch to resume when the
  *     game is back in foreground again later.
  */
-void gdt_hook_hidden(boolean exiting);
+void gdt_hook_hidden(bool exiting);
 
 /* gdt_hook_render -- Called when the game needs to draw a frame
  * This can only get called if an OpenGL surface is currently visible.
@@ -179,15 +182,15 @@ void gdt_gc_hint(void);
 // Return the time in nanoseconds at the highest precision available.
 uint64_t gdt_time_ns(void);
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);
-void gdt_open_url                 (const char* url);
+void gdt_open_url                 (string_t url);
     
-void gdt_log                      (log_type_t type,    const char* tag,
-                                   const char* format, ...);
-void gdt_logv                     (log_type_t type,    const char* tag,
-                                   const char* format, va_list args);
+void gdt_log                      (log_type_t type,    string_t tag,
+								   string_t format, ...);
+void gdt_logv                     (log_type_t type,    string_t tag,
+								   string_t format, va_list args);
 
 // Log (as LOG_ERROR), and then exit with EXIT_FAIL
-void gdt_fatal(const char* tag, const char* format, ...);
+void gdt_fatal(string_t tag, string_t format, ...);
 
 /* Immediately exit the program, with the specified error code.
  * Calling this will not invoke gdt_hook_hidden() or gdt_hook_exit(). 
@@ -208,8 +211,8 @@ void gdt_exit(exit_type_t type);
  */
 
 void*      gdt_resource_bytes (resource_t resource);
-long       gdt_resource_length(resource_t resource);
-resource_t gdt_resource_load  (const char* resourcePath);
+int32_t    gdt_resource_length(resource_t resource);
+resource_t gdt_resource_load  (string_t   resourcePath);
 void       gdt_resource_unload(resource_t resource);
 
 // -------------------------------------

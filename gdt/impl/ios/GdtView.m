@@ -37,7 +37,7 @@
 
 touchhandler_t touch_cb = NULL;
 int __h;
-const char* pathPrefix;
+string_t pathPrefix;
 
 @implementation GdtView
 
@@ -53,7 +53,7 @@ static NSString* logTypeToFormatString(log_type_t type) {
     } 
 }
 
-void gdt_logv(log_type_t type, const char* tag, const char* format, va_list args) {
+void gdt_logv(log_type_t type, string_t tag, string_t format, va_list args) {
     NSString* s = [NSString stringWithFormat:
                        logTypeToFormatString(type), tag, format];
         
@@ -67,7 +67,7 @@ void gdt_exit(exit_type_t type) {
 }
 
 
-void gdt_open_url(const char* url) {
+void gdt_open_url(string_t url) {
     NSString* s   = [NSString stringWithUTF8String: url];
     NSURL*    u   = [NSURL URLWithString: s];
     
@@ -84,8 +84,8 @@ void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
 }
 
 struct resource {
-  long len;
-  void* data;
+  int32_t len;
+  void*   data;
 };
 
 void* gdt_resource_bytes(resource_t res) {
@@ -97,13 +97,13 @@ long gdt_resource_length(resource_t res) {
 }
 
 
-resource_t gdt_resource_load(const char* resourcePath) {
+resource_t gdt_resource_load(string_t resourcePath) {
     char* s;
     asprintf(&s, "%s%s", pathPrefix, resourcePath);
     
     int fd = open(s, O_RDONLY);
     free(s);
-    if (fd == -1) return null;
+    if (fd == -1) return NULL;
     resource_t res = (resource_t)malloc(sizeof(struct resource));
     struct stat info;
     fstat(fd, &info);

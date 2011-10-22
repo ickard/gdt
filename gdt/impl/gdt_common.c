@@ -24,7 +24,7 @@
 
 #include "gdt.h"
 
-void gdt_log(log_type_t type, const char* tag, const char* format, ...) {
+void gdt_log(log_type_t type, string_t tag, string_t format, ...) {
     va_list args;
     va_start(args, format);
     
@@ -33,7 +33,7 @@ void gdt_log(log_type_t type, const char* tag, const char* format, ...) {
     va_end(args);
 }
 
-void gdt_fatal(const char* tag, const char* format, ...) {  
+void gdt_fatal(string_t tag, string_t format, ...) {
     va_list args;
     va_start(args, format);
 
