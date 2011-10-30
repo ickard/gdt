@@ -73,6 +73,9 @@ typedef enum {
 struct resource;
 typedef struct resource* resource_t;
 
+struct audioplayer;
+typedef struct audioplayer* audioplayer_t;
+
 typedef void (*touchhandler_t)(touch_type_t, int, int);
 
 #ifdef __cplusplus
@@ -216,6 +219,29 @@ resource_t gdt_resource_load  (string_t   resourcePath);
 void       gdt_resource_unload(resource_t resource);
 
 // -------------------------------------
+
+
+/* --- AudioPlayer functions ---
+ * Simple audio playback using the underlying OS.
+ * Error handling:
+ * - if anything goes wrong in gdt_audiplayer_create(), it returns NULL
+ * - errors in gdt_audioplayer_destroy() are ignored
+ * - if anything goes wrong in the other functions, they will return false,
+ * and that audioplayer_t object should not be used again at all (no need to even destroy it)
+ */
+
+audioplayer_t gdt_audioplayer_create(string_t resourcePath);
+void gdt_audioplayer_destroy(audioplayer_t player);
+bool gdt_audioplayer_play(audioplayer_t player);
+/*
+bool gdt_audioplayer_change_source(audioplayer_t player, string_t resourcePath);
+bool gdt_audioplayer_pause(audioplayer_t player);
+bool gdt_audioplayer_set_position(audioplayer_t player, double seconds);
+double gdt_audioplayer_get_position(audioplayer_t player);
+*/
+
+// -----------------------------
+
 #ifdef __cplusplus
 }
 #endif // cplusplus

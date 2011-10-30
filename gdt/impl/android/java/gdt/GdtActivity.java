@@ -34,6 +34,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView; 
 import android.os.Bundle;
@@ -136,6 +137,39 @@ final class Native {
         return false;
       }
       return true;
+  }
+  
+  static Object playerCreate(final String fileName) {
+		MediaPlayer p = new MediaPlayer();
+		
+		try {
+			AssetFileDescriptor fd = null;
+			try {
+				fd = _ctx.getAssets().openFd(fileName);
+				p.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());				
+			} finally {
+				if (fd != null) fd.close();
+			}
+			
+			p.prepare();
+		} catch (Exception ex) {
+			return null;
+		}
+		
+		return p;
+  }
+  
+  static void playerDestroy(final MediaPlayer player) {
+	  if (player != null) player.release();
+  }
+  
+  static boolean playerPlay(final MediaPlayer player) {
+	  try { 
+		  player.start();
+	  } catch (Exception ex) {
+		  return false;
+	  }
+	  return true;
   }
   
   static void openUrl(final String url) {

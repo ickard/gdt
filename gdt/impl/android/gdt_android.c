@@ -37,20 +37,29 @@ struct resource {
   int32_t length;
 };
 
+struct audioplayer {
+	jobject player;
+};
 
-string_t openAssetSig = "(Ljava/lang/String;)[Ljava/lang/Object;";
-string_t cleanAssetSig = "(Ljava/lang/Object;)Z";
 string_t openUrlSig = "(Ljava/lang/String;)V";
 string_t gcCollectSig = "()V";
+string_t openAssetSig = "(Ljava/lang/String;)[Ljava/lang/Object;";
+string_t cleanAssetSig = "(Ljava/lang/Object;)Z";
+string_t playerCreateSig = "(Ljava/lang/String;)Ljava/lang/Object;";
+string_t playerDestroySig = "(Landroid/media/MediaPlayer;)V";
+string_t playerPlaySig = "(Landroid/media/MediaPlayer;)Z";
 
 touchhandler_t cb_touch = NULL;
 jclass cls;
 JNIEnv* env;
-jmethodID loadAsset;
-jmethodID openUrl;
-jmethodID cleanAsset;
-jmethodID gcCollect;
 int _screenHeight;
+jmethodID openUrl;
+jmethodID gcCollect;
+jmethodID loadAsset;
+jmethodID cleanAsset;
+jmethodID playerCreate;
+jmethodID playerDestroy;
+jmethodID playerPlay;
 
 static touch_type_t mapAction (int what) {
   switch (what) {
@@ -86,10 +95,13 @@ void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz) {
 
     cls = clazz;
     env = e;
-    loadAsset = (*env)->GetStaticMethodID(env, cls, "openAsset", openAssetSig);
-    cleanAsset = (*env)->GetStaticMethodID(env, cls, "cleanAsset", cleanAssetSig);
     openUrl = (*env)->GetStaticMethodID(env, cls, "openUrl", openUrlSig);
     gcCollect = (*env)->GetStaticMethodID(env, cls, "gcCollect", gcCollectSig);
+    loadAsset = (*env)->GetStaticMethodID(env, cls, "openAsset", openAssetSig);
+    cleanAsset = (*env)->GetStaticMethodID(env, cls, "cleanAsset", cleanAssetSig);
+    playerCreate = (*env)->GetStaticMethodID(env, cls, "playerCreate", playerCreateSig);
+    playerDestroy = (*env)->GetStaticMethodID(env, cls, "playerDestroy", playerDestroySig);
+    playerPlay = (*env)->GetStaticMethodID(env, cls, "playerPlay", playerPlaySig);
 
     gdt_hook_initialize();
   }
@@ -164,6 +176,36 @@ void gdt_resource_unload(resource_t res) {
   (*env)->DeleteGlobalRef(env, arr);
   
   free(res);
+}
+
+audioplayer_t gdt_audioplayer_create(string_t p) {
+	  if (p == NULL || p[0] != '/')
+	    return NULL;
+
+	  string_t path = p+1;
+
+	  jobject player = (*env)->NewGlobalRef(env,
+	                  (*env)->CallStaticObjectMethod(env, cls, playerCreate,
+	                    (*env)->NewStringUTF(env, path)
+	                  )
+	                );
+
+	  // todo: if player null return null
+
+	  audioplayer_t ap = (audioplayer_t)malloc(sizeof(struct audioplayer));
+
+	  ap->player = player;
+
+	  return ap;
+}
+
+void gdt_audioplayer_destroy(audioplayer_t player) {
+	(*env)->CallStaticVoidMethod(env, cls, playerDestroy, player->player);
+	free(player);
+}
+
+bool gdt_audioplayer_play(audioplayer_t player) {
+	return (*env)->CallStaticBooleanMethod(env, cls, playerPlay, player->player);
 }
 
 

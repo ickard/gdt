@@ -120,6 +120,25 @@ void gdt_resource_unload(resource_t resource) {
     free(resource);
 }
 
+struct audioplayer {
+  //not implemented
+};
+
+//not implemented
+audioplayer_t gdt_audioplayer_create(string_t p) {
+  return NULL;
+}
+
+//not implemented
+void gdt_audioplayer_destroy(audioplayer_t player) {
+}
+
+//not implemented
+bool gdt_audioplayer_play(audioplayer_t player) {
+  return false;
+}
+
+
 void gdt_gc_hint(void) {
 }
 
