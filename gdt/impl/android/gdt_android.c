@@ -201,6 +201,7 @@ audioplayer_t gdt_audioplayer_create(string_t p) {
 
 void gdt_audioplayer_destroy(audioplayer_t player) {
 	(*env)->CallStaticVoidMethod(env, cls, playerDestroy, player->player);
+	(*env)->DeleteGlobalRef(env, player->player);
 	free(player);
 }
 
