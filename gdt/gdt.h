@@ -39,9 +39,11 @@
 #endif
 
 #ifndef __cplusplus
+#if(!defined(bool))
 typedef int bool;
 #define true 1
 #define false 0
+#endif
 #endif
 
 typedef const char* string_t;

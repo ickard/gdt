@@ -29,11 +29,13 @@
 #import <OpenGLES/EAGLDrawable.h> 
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
+#import <AVFoundation/AVFoundation.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
+
 
 touchhandler_t touch_cb = NULL;
 int __h;
@@ -92,7 +94,7 @@ void* gdt_resource_bytes(resource_t res) {
 	return res->data;
 }
 
-long gdt_resource_length(resource_t res) {
+int32_t gdt_resource_length(resource_t res) {
 	return res->len;
 }
 
@@ -121,21 +123,31 @@ void gdt_resource_unload(resource_t resource) {
 }
 
 struct audioplayer {
-  //not implemented
+    AVAudioPlayer* player;
 };
 
-//not implemented
 audioplayer_t gdt_audioplayer_create(string_t p) {
-  return NULL;
+    NSString* path = [NSString stringWithFormat:@"%s%s", pathPrefix, p];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    
+    AVAudioPlayer* player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    
+    if(player == nil)
+        return NULL;
+    
+    audioplayer_t ap = (audioplayer_t)malloc(sizeof(struct audioplayer));
+    ap->player = player;
+    return ap;
 }
 
-//not implemented
 void gdt_audioplayer_destroy(audioplayer_t player) {
+    [player->player release];
+    free(player);
 }
 
-//not implemented
 bool gdt_audioplayer_play(audioplayer_t player) {
-  return false;
+    [player->player play];
+    return true;
 }
 
 
