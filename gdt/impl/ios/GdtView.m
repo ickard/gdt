@@ -35,6 +35,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <sys/time.h>
+
 
 
 touchhandler_t touch_cb = NULL;
@@ -52,6 +54,8 @@ static NSString* logTypeToFormatString(log_type_t type) {
             return @"%s: [warning] %s";
         case LOG_DEBUG:
             return @"%s: [debug] %s";
+        case LOG_NORMAL:
+            return @"%s: %s";
     } 
 }
 
@@ -134,9 +138,12 @@ audioplayer_t gdt_audioplayer_create(string_t p) {
     
     if(player == nil)
         return NULL;
+        
+    [player prepareToPlay];
     
     audioplayer_t ap = (audioplayer_t)malloc(sizeof(struct audioplayer));
     ap->player = player;
+    
     return ap;
 }
 
@@ -163,7 +170,6 @@ uint64_t gdt_time_ns(void) {
 -(id)initWithFrame:(CGRect)frame
 {
     pathPrefix = [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSASCIIStringEncoding];
-    gdt_log(LOG_WARNING, "pathprefix", pathPrefix);
     self = [super initWithFrame:frame];
     
     if (self) {

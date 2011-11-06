@@ -76,6 +76,8 @@ static touch_type_t mapAction (int what) {
 
 static int mapType(log_type_t type) {
   switch (type) {
+  	case LOG_DEBUG:
+	  return ANDROID_LOG_DEBUG;
     case LOG_ERROR:
       return ANDROID_LOG_ERROR;
     case LOG_WARNING:
