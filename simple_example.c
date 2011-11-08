@@ -36,7 +36,7 @@ GLint _screen_height;
 int _x = 100; 
 int _y = 100;
 
-static boolean inside_the_square(int x, int y) {
+static bool inside_the_square(int x, int y) {
   return (x > _x && x < (_x + 90))
       && (y > _y && y < (_y + 90));
 }
@@ -46,7 +46,7 @@ static void move(int x, int y) {
   _y = y-90/2;
 }
 
-boolean state = 0;
+bool state = 0;
 static void on_touch(touch_type_t what, int x, int y) {
   if (state) {
     switch (what) {
@@ -114,7 +114,7 @@ void gdt_hook_visible(int width, int height) {
   glClearColor(0.4, 0.8, 0.4, 1);
 }
 
-void gdt_hook_hidden(boolean exiting) {
+void gdt_hook_hidden(bool exiting) {
 
 }
 
