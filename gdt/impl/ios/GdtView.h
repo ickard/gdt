@@ -24,7 +24,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
-#include <OpenGLES/ES1/glext.h>
+#include <OpenGLES/ES2/glext.h>
 
 @interface GdtView : UIView {
     @private EAGLContext* ctx; 

@@ -176,23 +176,23 @@ uint64_t gdt_time_ns(void) {
         CAEAGLLayer* layer = (CAEAGLLayer*)super.layer;
         layer.opaque = YES;
         
-        ctx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
+        ctx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         [EAGLContext setCurrentContext:ctx];
         
         GLuint fb;
-        glGenFramebuffersOES(1, &fb);
-        glBindFramebufferOES(GL_FRAMEBUFFER_OES, fb);
+        glGenFramebuffers(1, &fb);
+        glBindFramebuffer(GL_FRAMEBUFFER, fb);
         
         GLuint rb;
-        glGenRenderbuffersOES(1, &rb);
-        glBindRenderbufferOES(GL_RENDERBUFFER_OES, rb);
+        glGenRenderbuffers(1, &rb);
+        glBindRenderbuffer(GL_RENDERBUFFER, rb);
         
-        glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES,
-                                     GL_COLOR_ATTACHMENT0_OES,
-                                     GL_RENDERBUFFER_OES,
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+                                     GL_COLOR_ATTACHMENT0,
+                                     GL_RENDERBUFFER,
                                      rb);
         
-        [ctx renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:layer];
+        [ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
         
         gdt_hook_initialize();
         gdt_hook_visible(CGRectGetWidth(frame), __h = CGRectGetHeight(frame));
@@ -215,7 +215,7 @@ uint64_t gdt_time_ns(void) {
 {
     gdt_hook_render();
     
-    [ctx presentRenderbuffer:GL_RENDERBUFFER_OES];
+    [ctx presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 -(void)handleTouches:(NSSet*)touches withType:(touch_type_t)type 

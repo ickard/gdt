@@ -24,109 +24,159 @@
  */
 
 #include "gdt/gdt.h"
-#include "gdt/gdt_gles1.h"
-#include <unistd.h> 
+#include "gdt/gdt_gles2.h"
+#include <string.h>
+#include <unistd.h>
 
-const char* TAG = "simple_example.c"; 
+string_t simpleVertexShader = "                               \
+uniform vec2 offset;                                          \
+attribute vec4 position;                                      \
+void main(void) {                                             \
+    gl_Position = position + vec4(offset.x, offset.y, 0, 0);  \
+}                                                             \
+";
 
-GLint _screen_width;
-GLint _screen_height;
+string_t redFragmentShader = "         \
+void main(void) {                      \
+    gl_FragColor = vec4(1, 0, 0, 1);   \
+}                                      \
+";
 
-// (_x, _y): the current position of the square 
-int _x = 100; 
-int _y = 100;
+string_t TAG = "simple_example";
+float _x = -0.5;
+float _y = 0.5;
+int _width;
+int _height;
+GLuint _offsetUniform;
+#define LOG(args...) gdt_log(LOG_NORMAL, TAG, args)
+#define SIZE 0.3
 
-static bool inside_the_square(int x, int y) {
-  return (x > _x && x < (_x + 90))
-      && (y > _y && y < (_y + 90));
-}
+static GLuint compileShader(string_t shaderCode, GLenum type) {
+    GLuint shader = glCreateShader(type);
 
-static void move(int x, int y) {
-  _x = x-90/2;
-  _y = y-90/2;
-}
+    int len = strlen(shaderCode);
+    glShaderSource(shader, 1, &shaderCode, &len);
 
-bool state = 0;
-static void on_touch(touch_type_t what, int x, int y) {
-  if (state) {
-    switch (what) {
-      case TOUCH_MOVE:
-        move(x, y);
-        break;
-      case TOUCH_UP:
-        state = 0;
-        break;
-      default:
-        {}
+    glCompileShader(shader);
+
+    GLint result;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+    if (result == GL_FALSE) {
+        gdt_fatal(TAG, "Error compiling shader");
     }
-  } else {
-    switch (what) { 
-      case TOUCH_DOWN:
-        if (inside_the_square(x, y)) {
-          state = 1;
-          move(x, y);
+
+    return shader;
+}
+
+static GLuint linkProgram() {
+    GLuint vertexShader = compileShader(simpleVertexShader, GL_VERTEX_SHADER);
+    GLuint fragmentShader = compileShader(redFragmentShader, GL_FRAGMENT_SHADER);
+
+    GLuint program = glCreateProgram();
+
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+
+    glLinkProgram(program);
+
+    GLint result;
+    glGetProgramiv(program, GL_LINK_STATUS, &result);
+    if (result == GL_FALSE) {
+        gdt_fatal(TAG, "Error linking program");
+    }
+
+    return program;
+}
+
+static bool inside_the_square(float x, float y) {
+    return (x > _x && x < (_x + SIZE)) && (y > _y && y < (_y + SIZE));
+}
+
+static void move(float x, float y) {
+    _x = x - SIZE / 2;
+    _y = y - SIZE / 2;
+}
+
+static void on_touch(touch_type_t what, int screenX, int screenY) {
+    static int state = 0;
+
+    float x = 2 * screenX / (float) _width  - 1;
+    float y = 2 * screenY / (float) _height - 1;
+
+    if (state) {
+        switch (what) {
+        case TOUCH_MOVE:
+            move(x, y);
+            break;
+        case TOUCH_UP:
+            state = 0;
+            break;
+        default: {}
         }
-        break;
-      default:
-        {}
+    } else {
+        switch (what) {
+        case TOUCH_DOWN:
+            if (inside_the_square(x, y)) {
+                state = 1;
+                move(x, y);
+            }
+            break;
+        default: {}
+        }
     }
-  }
-}
-
-static void draw_the_square() {
-  static const float v[] = {
-    0,  90,
-    0,  0,
-    90, 90,
-    90, 0
-  };    
-  
-  glPushMatrix();
-   glTranslatef(_x, _y, 0);
-   glVertexPointer(2, GL_FLOAT, 2*sizeof(float), v);
-   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  glPopMatrix();  
 }
 
 void gdt_hook_initialize() {
-  gdt_log(LOG_DEBUG, TAG, "started");
-  
-  gdt_set_callback_touch(&on_touch);
+    LOG("started");
+
+    gdt_set_callback_touch(&on_touch);
 }
 
 void gdt_hook_exit() {
-  gdt_log(LOG_DEBUG, TAG, "exiting");
+    LOG("exiting");
 }
 
 void gdt_hook_visible(int width, int height) {
-  gdt_log(LOG_DEBUG, TAG, "visible, screen w=%d h=%d", width, height);
+    LOG("visible, screen w=%d h=%d", width, height);
 
-  _screen_width = width;
-  _screen_height = height;
-  
-  glViewport(0, 0, width, height);
-  
-  glMatrixMode(GL_PROJECTION);  
-  glOrthof(0, width, 0, height, 0, 1);
-  
-  glMatrixMode(GL_MODELVIEW); 
-  glEnableClientState(GL_VERTEX_ARRAY); 
-  glClearColor(0.4, 0.8, 0.4, 1);
+    GLuint program = linkProgram();
+
+    _width = width;
+    _height = height;
+    _offsetUniform = glGetUniformLocation(program, "offset");
+    GLuint positionAttrib = glGetAttribLocation(program, "position");
+
+    static const GLfloat v[] = { 0, SIZE,
+                                 0, 0,
+                                 SIZE, SIZE,
+                                 SIZE, 0    };
+    GLuint vertexBuf;
+    glGenBuffers(1, &vertexBuf);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+
+    static const GLubyte i[] = { 0, 1, 2, 3 };
+    GLuint indexBuf;
+    glGenBuffers(1, &indexBuf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuf);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i), i, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(positionAttrib);
+    glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+
+    glViewport(0, 0, width, height);
+    glClearColor(0.4, 0.8, 0.4, 1);
+    glUseProgram(program);
 }
 
 void gdt_hook_hidden(bool exiting) {
-
+    LOG("hidden");
 }
 
 void gdt_hook_render() {
-  glClear(GL_COLOR_BUFFER_BIT);
-  
-  glColor4f(0, 0, 1, 0.5);
-  
-  draw_the_square();
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUniform2f(_offsetUniform, _x, _y);
+    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, NULL);
 }
-
-
-
-
 

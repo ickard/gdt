@@ -74,7 +74,7 @@ final class GdtView extends GLSurfaceView {
   
   public GdtView(final Context ctx) {
     super(ctx);
-    //setEGLConfigChooser(8, 8, 8, 8, 24, 0);
+    setEGLContextClientVersion(2);
     setRenderer(new Renderer() {
       public void onSurfaceCreated(GL10 _, EGLConfig __) {
         synchronized(lock) { Native.init(ctx); }
@@ -82,7 +82,7 @@ final class GdtView extends GLSurfaceView {
       public void onSurfaceChanged(GL10 _, int width, int height) {
         synchronized(lock) { Native.eventResize(width, height); }
       } 
-      public void onDrawFrame(GL10 _) {
+      public void onDrawFrame(GL10 _) { 
         synchronized(lock) { Native.render(); }
       } 
     });
