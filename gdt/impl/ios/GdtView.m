@@ -41,7 +41,9 @@
 
 touchhandler_t touch_cb = NULL;
 int __h;
-string_t pathPrefix;
+string_t resourceDir;
+string_t storageDir;
+string_t cacheDir;
 
 @implementation GdtView
 
@@ -105,7 +107,7 @@ int32_t gdt_resource_length(resource_t res) {
 
 resource_t gdt_resource_load(string_t resourcePath) {
     char* s;
-    asprintf(&s, "%s%s", pathPrefix, resourcePath);
+    asprintf(&s, "%s%s", resourceDir, resourcePath);
     
     int fd = open(s, O_RDONLY);
     free(s);
@@ -131,7 +133,7 @@ struct audioplayer {
 };
 
 audioplayer_t gdt_audioplayer_create(string_t p) {
-    NSString* path = [NSString stringWithFormat:@"%s%s", pathPrefix, p];
+    NSString* path = [NSString stringWithFormat:@"%s%s", resourceDir, p];
     NSURL* url = [NSURL fileURLWithPath:path];
     
     AVAudioPlayer* player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
@@ -157,6 +159,13 @@ bool gdt_audioplayer_play(audioplayer_t player) {
     return true;
 }
 
+string_t gdt_get_storage_directory_path(void) {
+    return storageDir;
+}
+
+string_t gdt_get_cache_directory_path(void) {
+    return cacheDir;
+}
 
 void gdt_gc_hint(void) {
 }
@@ -169,7 +178,6 @@ uint64_t gdt_time_ns(void) {
 
 -(id)initWithFrame:(CGRect)frame
 {
-    pathPrefix = [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSASCIIStringEncoding];
     self = [super initWithFrame:frame];
     
     if (self) {
@@ -193,6 +201,10 @@ uint64_t gdt_time_ns(void) {
                                      rb);
         
         [ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
+        
+        resourceDir = [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSASCIIStringEncoding];
+        storageDir = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
+        cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
         
         gdt_hook_initialize();
         gdt_hook_visible(CGRectGetWidth(frame), __h = CGRectGetHeight(frame));

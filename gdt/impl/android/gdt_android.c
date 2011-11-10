@@ -49,6 +49,8 @@ string_t playerCreateSig = "(Ljava/lang/String;)Ljava/lang/Object;";
 string_t playerDestroySig = "(Landroid/media/MediaPlayer;)V";
 string_t playerPlaySig = "(Landroid/media/MediaPlayer;)Z";
 
+string_t cacheDir;
+string_t storageDir;
 touchhandler_t cb_touch = NULL;
 jclass cls;
 JNIEnv* env;
@@ -90,7 +92,7 @@ static int mapType(log_type_t type) {
 
 
 
-void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz) {
+void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz, jstring cachePath, jstring storagePath) {
   static bool initialized = false;
   if (!initialized) {
     initialized = true;
@@ -104,6 +106,9 @@ void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz) {
     playerCreate = (*env)->GetStaticMethodID(env, cls, "playerCreate", playerCreateSig);
     playerDestroy = (*env)->GetStaticMethodID(env, cls, "playerDestroy", playerDestroySig);
     playerPlay = (*env)->GetStaticMethodID(env, cls, "playerPlay", playerPlaySig);
+
+    cacheDir = (*env)->GetStringUTFChars(env, cachePath, NULL);
+    storageDir = (*env)->GetStringUTFChars(env, storagePath, NULL);
 
     gdt_hook_initialize();
   }
@@ -211,6 +216,13 @@ bool gdt_audioplayer_play(audioplayer_t player) {
 	return (*env)->CallStaticBooleanMethod(env, cls, playerPlay, player->player);
 }
 
+string_t gdt_get_storage_directory_path(void) {
+	return storageDir;
+}
+
+string_t gdt_get_cache_directory_path(void) {
+	return cacheDir;
+}
 
 void gdt_set_callback_touch(touchhandler_t on_touch)
 {

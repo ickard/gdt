@@ -139,6 +139,10 @@ void gdt_hook_exit() {
 void gdt_hook_visible(int width, int height) {
     LOG("visible, screen w=%d h=%d", width, height);
 
+    LOG("storage dir path = %s", gdt_get_storage_directory_path());
+    LOG("cache dir path = %s", gdt_get_cache_directory_path());
+
+
     GLuint program = linkProgram();
 
     _width = width;

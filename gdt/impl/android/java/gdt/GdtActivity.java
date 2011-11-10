@@ -104,7 +104,7 @@ final class Native {
   
   private Native() { } 
   
-  static native void initialize();
+  static native void initialize(String cacheDir, String storageDir);
   static native void render();
   static native void hide(boolean exitToo);   
   static native void eventTouch(int what, float x, float y);
@@ -112,7 +112,7 @@ final class Native {
   
   static void init(Context ctx) {
     _ctx = ctx;
-    initialize();
+    initialize(_ctx.getCacheDir().getPath(), _ctx.getFilesDir().getPath());
   }
   
   static Object[] openAsset(final String fileName) {

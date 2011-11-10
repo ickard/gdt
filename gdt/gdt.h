@@ -202,6 +202,12 @@ void gdt_fatal(string_t tag, string_t format, ...);
  */
 void gdt_exit(exit_type_t type);
 
+// Get a filesystem path to the persistent storage directory reserved for the app
+string_t gdt_get_storage_directory_path(void);
+
+// Get a filesystem path to the cache (non-persistent storage) directory reserved for the app
+string_t gdt_get_cache_directory_path(void);
+
 // ------------------------------
 
 
