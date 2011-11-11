@@ -60,7 +60,9 @@ public abstract class GdtActivity extends Activity {
   protected void onPause() {
     super.onPause();
     _view.onPause();
-	  Native.hide(false);
+    synchronized(GdtView.lock) {
+    	Native.hide(false);
+    }
   }
   @Override
   protected void onResume() {
@@ -70,7 +72,7 @@ public abstract class GdtActivity extends Activity {
 } 
  
 final class GdtView extends GLSurfaceView { 
-  private final Object lock = new Object();
+  final static Object lock = new Object();
   
   public GdtView(final Context ctx) {
     super(ctx);
