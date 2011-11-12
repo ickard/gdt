@@ -27,6 +27,7 @@
 #include "gdt/gdt_gles2.h"
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 string_t simpleVertexShader = "                               \
 uniform vec2 offset;                                          \
@@ -136,12 +137,52 @@ static void on_touch(touch_type_t what, int screenX, int screenY) {
     }
 }
 
+string_t SAVE_FILE = "state";
+string_t _save_path;
+
+static void load_state() {
+    LOG("checking for saved state to load");
+    
+    FILE* file = fopen(_save_path, "r");
+    if (file == NULL) {
+        LOG("found no state to load");
+    } else {
+        float xy[2];
+        int count = fread(xy, sizeof(xy), 1, file);
+        if (count == 1) {
+            _x = xy[0]; _y = xy[1];
+            LOG("success loading state (_x=%1.3f, _y=%1.3f)", _x, _y);
+        } else LOG("failed to read state");
+        fclose(file);
+    }
+}
+
+static bool save_state() {
+    FILE* file = fopen(_save_path, "w");
+    if (file == NULL)
+        return false;
+
+    float xy[2];
+    xy[0] = _x; xy[1] = _y;
+    int count = fwrite(xy, sizeof(xy), 1, file);    
+    fclose(file);
+    return count == 1;
+}
+
+
 void gdt_hook_initialize() {
 	ASSERT(_state == STATE_NOT_INITIALIZED);
 	_state = STATE_INITIALIZED_NOT_VISIBLE;
 
-    LOG("initialize");
+    LOG("initialize");    
 
+    char* output;
+    asprintf(&output, "%s/%s", gdt_get_storage_directory_path(), SAVE_FILE);
+    _save_path = output;
+    
+    //LOG(_save_path);
+    load_state();
+    
     gdt_set_callback_touch(&on_touch);
 }
 
@@ -209,6 +250,8 @@ void gdt_hook_save_state() {
 #endif
 
 	LOG("save_state");
+    
+    LOG(save_state()? "saved state": "failed to save state");
 }
 
 void gdt_hook_hidden() {
