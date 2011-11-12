@@ -48,6 +48,7 @@ string_t cleanAssetSig = "(Ljava/lang/Object;)Z";
 string_t playerCreateSig = "(Ljava/lang/String;)Ljava/lang/Object;";
 string_t playerDestroySig = "(Landroid/media/MediaPlayer;)V";
 string_t playerPlaySig = "(Landroid/media/MediaPlayer;)Z";
+string_t setKbdModeSig = "(I)V";
 
 string_t cacheDir;
 string_t storageDir;
@@ -62,6 +63,14 @@ jmethodID cleanAsset;
 jmethodID playerCreate;
 jmethodID playerDestroy;
 jmethodID playerPlay;
+jmethodID setKbdMode;
+
+void gdt_set_callback_text(texthandler_t on_text_input) {
+
+}
+string_t gdt_backspace() {
+
+}
 
 static touch_type_t mapAction (int what) {
   switch (what) {
@@ -110,6 +119,8 @@ void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz, jstring cachePath, jstr
     cacheDir = (*env)->GetStringUTFChars(env, cachePath, NULL);
     storageDir = (*env)->GetStringUTFChars(env, storagePath, NULL);
 
+    setKbdMode = (*env)->GetStaticMethodID(env, cls, "setKbdMode", setKbdModeSig);
+
     gdt_hook_initialize();
   }
 }
@@ -145,7 +156,7 @@ void Java_gdt_Native_visible(JNIEnv* _, jclass __, jboolean newSurface, jint wid
 }
 
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
-
+  (*env)->CallStaticVoidMethod(env, cls, setKbdMode, mode);
 }
 
 void gdt_open_url(string_t url) {

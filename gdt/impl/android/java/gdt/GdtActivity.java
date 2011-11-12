@@ -39,9 +39,12 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView; 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
 public abstract class GdtActivity extends Activity {
   private GdtView _view;
@@ -141,7 +144,7 @@ final class GdtView extends GLSurfaceView {
     }
     return true;
   }
-  
+
   private void show() {
     Native.visible(_newGL, _w, _h);	  
     _newGL = false;
@@ -172,8 +175,11 @@ final class Native {
   static native void eventTouch(int what, float x, float y);
   static native void visible(boolean newSurface, int width, int height);  
   
+  static InputMethodManager _inputMethodManager;
+  
   static void init(Context ctx) {
     _ctx = ctx;
+    _inputMethodManager = (InputMethodManager) _ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
     initialize(_ctx.getCacheDir().getPath(), _ctx.getFilesDir().getPath());
   }
   
@@ -239,9 +245,11 @@ final class Native {
     intent.setData(Uri.parse(url));
     _ctx.startActivity(intent);
   }
-  
-  static void setVirtualKeyboardMode(int mode) {
-    
+  static void setKbdMode(int mode) {
+    if (mode == 0)
+      _inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_IMPLICIT_ONLY);
+	else
+      _inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
   }
   
   static void gcCollect() {

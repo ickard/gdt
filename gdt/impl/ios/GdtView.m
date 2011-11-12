@@ -37,15 +37,20 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-
-
+GdtView* _view = NULL;
 touchhandler_t touch_cb = NULL;
+texthandler_t text_cb = NULL;
 string_t resourceDir;
 string_t storageDir;
 string_t cacheDir;
+static bool _visible = false;
+static int _w = -1;
+static int _h = -1;
+static string_t _backspace;
 
-@implementation GdtView
-
+string_t gdt_backspace() {
+    return _backspace;
+}
 
 static NSString* logTypeToFormatString(log_type_t type) {
     switch(type) {
@@ -67,8 +72,6 @@ void gdt_logv(log_type_t type, string_t tag, string_t format, va_list args) {
     NSLogv(s, args);     
 }
 
-
-
 void gdt_exit(exit_type_t type) {
     [NSThread exit];
 }
@@ -81,14 +84,30 @@ void gdt_open_url(string_t url) {
     [[UIApplication sharedApplication] openURL: u];
 }
 
+void gdt_set_callback_text(texthandler_t f) {
+    text_cb = f;
+}
 
+static void text_input(string_t text) {
+    if (text_cb)
+        text_cb(text);
+}
 
 void gdt_set_callback_touch(touchhandler_t f) {
-        touch_cb = f;
+    touch_cb = f;
 }
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
-    
+    switch(mode) {
+    case KBD_VISIBLE:
+        [_view becomeFirstResponder];
+        break;
+    case KBD_HIDDEN:
+        [_view resignFirstResponder];
+        break;
+    };
 }
+
+
 
 struct resource {
   int32_t len;
@@ -102,7 +121,6 @@ void* gdt_resource_bytes(resource_t res) {
 int32_t gdt_resource_length(resource_t res) {
 	return res->len;
 }
-
 
 resource_t gdt_resource_load(string_t resourcePath) {
     char* s;
@@ -126,6 +144,8 @@ void gdt_resource_unload(resource_t resource) {
     
     free(resource);
 }
+
+
 
 struct audioplayer {
     AVAudioPlayer* player;
@@ -166,9 +186,9 @@ string_t gdt_get_cache_directory_path(void) {
     return cacheDir;
 }
 
-static bool _visible = false;
-static int _w = -1;
-static int _h = -1;
+
+@implementation GdtView
+
 
 -(void)visible:(BOOL)makeVisible {
     if (makeVisible) gdt_hook_visible(false, _w, _h);
@@ -185,6 +205,8 @@ uint64_t gdt_time_ns(void) {
 	gettimeofday(&now, NULL);
     return (uint64_t) now.tv_sec * 1000000000LL + (uint64_t) now.tv_usec * 1000LL;
 }
+
+
 
 -(id)initWithFrame:(CGRect)frame
 {
@@ -216,6 +238,8 @@ uint64_t gdt_time_ns(void) {
         storageDir = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
         cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
         
+        _view = self;
+        _backspace = (string_t)malloc(1);
         gdt_hook_initialize();
         gdt_hook_visible(true, _w = CGRectGetWidth(frame), _h = CGRectGetHeight(frame));
         _visible = true;
@@ -250,6 +274,21 @@ uint64_t gdt_time_ns(void) {
     }
 }
 
+-(BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+-(BOOL)hasText {
+    return YES;
+}
+
+-(void)insertText:(NSString *)text {
+    text_input([text cStringUsingEncoding:NSUTF8StringEncoding]);
+}
+
+-(void)deleteBackward {
+    text_input(gdt_backspace());
+}
 
 -(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)_
 {

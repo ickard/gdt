@@ -26,7 +26,7 @@
 #import <UIKit/UIKit.h>
 #include <OpenGLES/ES2/glext.h>
 
-@interface GdtView : UIView {
+@interface GdtView : UIView<UIKeyInput> {
     @private EAGLContext* ctx; 
 }
 

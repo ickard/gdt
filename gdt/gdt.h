@@ -46,12 +46,13 @@ typedef int bool;
 #endif
 #endif
 
+
 typedef const char* string_t;
+
 
 typedef enum {
   KBD_HIDDEN,
-  KBD_PORTRAIT,
-  KBD_LANDSCAPE
+  KBD_VISIBLE
 } keyboard_mode_t;
 
 typedef enum {
@@ -79,6 +80,7 @@ struct audioplayer;
 typedef struct audioplayer* audioplayer_t;
 
 typedef void (*touchhandler_t)(touch_type_t, int, int);
+typedef void (*texthandler_t)(string_t);
 
 #ifdef __cplusplus
 extern "C" {
@@ -179,6 +181,9 @@ void gdt_hook_hidden(void);
  */
  
 void gdt_set_callback_touch(touchhandler_t on_touch);
+void gdt_set_callback_text(texthandler_t on_text_input);
+string_t gdt_backspace();
+
 
 // ------------------------------------
 

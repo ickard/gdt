@@ -43,6 +43,7 @@ void main(void) {                      \
 }                                      \
 ";
 
+bool _kbdVisible = false;
 string_t TAG = "simple_example";
 float _x = -0.5;
 float _y = 0.5;
@@ -108,6 +109,15 @@ static void move(float x, float y) {
     _y = y - SIZE / 2;
 }
 
+static void toggle_kbd() {
+    if (_kbdVisible)
+        gdt_set_virtual_keyboard_mode(KBD_HIDDEN);
+    else
+        gdt_set_virtual_keyboard_mode(KBD_VISIBLE);
+        
+    _kbdVisible = !_kbdVisible;
+}
+
 static void on_touch(touch_type_t what, int screenX, int screenY) {
     static int state = 0;
 
@@ -130,11 +140,17 @@ static void on_touch(touch_type_t what, int screenX, int screenY) {
             if (inside_the_square(x, y)) {
                 state = 1;
                 move(x, y);
+            } else {
+                toggle_kbd();
             }
             break;
         default: {}
         }
     }
+}
+
+static void on_text_input(string_t input) {
+    LOG("(on_text_input) %s", input == gdt_backspace()? "<backspace>": input);
 }
 
 string_t SAVE_FILE = "state";
@@ -184,7 +200,9 @@ void gdt_hook_initialize() {
     load_state();
     
     gdt_set_callback_touch(&on_touch);
+    gdt_set_callback_text(&on_text_input);
 }
+
 
 void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeight) {
 	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
@@ -224,6 +242,7 @@ void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeig
     _width = surfaceWidth;
     _height = surfaceHeight;
     glViewport(0, 0, _width, _height);
+    
 }
 
 void gdt_hook_active() {
