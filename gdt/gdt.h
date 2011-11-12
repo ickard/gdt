@@ -103,21 +103,20 @@ extern "C" {
 void gdt_hook_initialize(void);
 
 /* gdt_hook_visible -- Called when the game has become visible and an OpenGL
- *                     ES surface is ready with the specified dimensions
+ *                     ES surface is ready for use.
  * 
- * newSurface is true if the surface is new 
+ * The newContext is used to determine if the OpenGL context is freshly created.
  *
  * This is called
  *   - shortly after gdt_hook_initialize()
- *   - when game has been running in background
- *     and has just returned to foreground
- *   - if the surface is resized
+ *   - when game has been hidden in the background
+ *     and has just become visible once again
  * Example of things to run here:
- *   - If you have extra threads for game logic, enable them here
- *   - If newSurface is true, prepare the gl environment
+ *   - If you have extra threads for game logic, maybe enable them here
+ *   - If newContext is true, prepare the gl environment
  *   - glViewport, and other size related operations
  */
-void gdt_hook_visible(bool newSurface, int32_t surfaceWidth, int32_t surfaceHeight);
+void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeight);
 
 /* gdt_hook_active -- The game is in the foreground, it has the focus.
  *
@@ -139,7 +138,7 @@ void gdt_hook_render(void);
  * Things to do:
  *   - Pause the game, and add something like a nice "Paused" screen
  *     so the player can touch to resume when the
- *     game is back in foreground again later.
+ *     game gets the focus once again.
  *   - Maybe mute the sound if you unmute it in gdt_hook_active()
  * This roughly corresponds to:
  *  Android: onPause

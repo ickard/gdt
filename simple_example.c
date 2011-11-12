@@ -186,13 +186,13 @@ void gdt_hook_initialize() {
     gdt_set_callback_touch(&on_touch);
 }
 
-void gdt_hook_visible(bool newSurface, int width, int height) {
+void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeight) {
 	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
 	_state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
 
-    LOG("visible, newSurface=%s, screen w=%d h=%d", newSurface? "true" : "false", width, height);
+    LOG("visible, newContext=%s, screen w=%d h=%d", newContext? "true" : "false", surfaceWidth, surfaceHeight);
 
-    if (newSurface) {
+    if (newContext) {
         GLuint program = linkProgram();
 
         _offsetUniform = glGetUniformLocation(program, "offset");
@@ -221,8 +221,8 @@ void gdt_hook_visible(bool newSurface, int width, int height) {
         glClearColor(0.4, 0.8, 0.4, 1);
     }
 
-    _width = width;
-    _height = height;
+    _width = surfaceWidth;
+    _height = surfaceHeight;
     glViewport(0, 0, _width, _height);
 }
 
