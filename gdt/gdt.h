@@ -102,67 +102,75 @@ extern "C" {
  */
 void gdt_hook_initialize(void);
 
-/* gdt_hook_exit -- This is called when the game is about to exit:
- *   - On Android and on iOS (if the game is a background-capable app):
- *       when the system needs to reclaim memory
- *       and the game is currently in the background
- *   - On iOS (non-background app):
- *       User presses home button
- * Example things to include here:
- *   - Free resources
- *   - If appropriate, save game state
- */
-void gdt_hook_exit(void);
-
 /* gdt_hook_visible -- Called when the game has become visible and an OpenGL
  *                     ES surface is ready with the specified dimensions
  * 
- * This is called
- *   - immediately after gdt_hook_initialize()
- *   - when game has been running in background
- *     and has just returned to foreground
- * Example of things to run here:
- *   - If you have extra threads for game logic, enable them here
- *   - Prepare the gl surface
- * Example code:
- *   glViewport(... screenWidth ... screenHeight);
- *   ...
- *   glOrtof(...);
- *   glMatrixMode(...);
- */
-void gdt_hook_visible(int32_t surfaceWidth, int32_t surfaceHeight);
-
-/* gdt_hook_hidden -- The game is going to the background or exiting
- * and the OpenGL ES surface is now gone
+ * newSurface is true if the surface is new 
  *
  * This is called
- *   - immediately before gdt_hook_exit()   --> exiting = true
- *   - when game has been running in the
- *     foreground and is being hidden      --> exiting = false
+ *   - shortly after gdt_hook_initialize()
+ *   - when game has been running in background
+ *     and has just returned to foreground
+ *   - if the surface is resized
+ * Example of things to run here:
+ *   - If you have extra threads for game logic, enable them here
+ *   - If newSurface is true, prepare the gl environment
+ *   - glViewport, and other size related operations
+ */
+void gdt_hook_visible(bool newSurface, int32_t surfaceWidth, int32_t surfaceHeight);
+
+/* gdt_hook_active -- The game is in the foreground, it has the focus.
+ *
+ * Maybe unmute the sound if you mute it in gdt_hook_inactive()
+ *
+ * This corresponds to:
+ *  Android: onResume
+ *  iOS:     applicationDidBecomeActive
+ */
+void gdt_hook_active(void);
+
+/* gdt_hook_render -- Called when the game needs to draw a frame
+ * This cannot get called when the game is hidden.
+ */
+void gdt_hook_render(void);
+
+/* gdt_hook_inactive -- The game no longer has the focus.
+ *
+ * Things to do:
+ *   - Pause the game, and add something like a nice "Paused" screen
+ *     so the player can touch to resume when the
+ *     game is back in foreground again later.
+ *   - Maybe mute the sound if you unmute it in gdt_hook_active()
+ * This roughly corresponds to:
+ *  Android: onPause
+ *  iOS:     applicationWillResignActive
+ */
+void gdt_hook_inactive(void);
+
+/* gdt_hook_save_state -- After this method, it is possible that the game may be killed
+ * at any time, so save state here, just to be safe.
+ *
+ * On Android this is called just after gdt_hook_inactive(),
+ * on iOS it is called just after gdt_hook_hidden()
+ */
+void gdt_hook_save_state(void);
+
+/* gdt_hook_hidden -- The game is going to the background
+ * and the OpenGL ES surface is now gone or hidden
+ *
+ * This is called when game has been running in the
+ * foreground and is being hidden
  * Example of things to run here:
  *   - If you have extra threads for game logic,
  *     make sure to inactive them here
- *   - Add something like a nice "Paused" screen
- *     so the player can touch to resume when the
- *     game is back in foreground again later.
+ *   - Stop processing stuff in general
+ *
+ * This roughly corresponds to:
+ *  Android: onStop
+ *  iOS:     applicationDidEnterBackground
  */
-void gdt_hook_hidden(bool exiting);
+void gdt_hook_hidden(void);
 
-/* gdt_hook_render -- Called when the game needs to draw a frame
- * This can only get called if an OpenGL surface is currently visible.
- * Example code:
- *   prepare_game_for_draw();
- *   glClearColor(...);
- *   ...
- *   glPushMatrix();
- *   ...
- *   glTranslate3f(...);
- *   glDrawBlabla(..);
- *   ...
- *   glPopMatrix();
- *   ...
- */
-void gdt_hook_render(void);
 
 // ----------------------------
 
@@ -198,8 +206,7 @@ void gdt_logv                     (log_type_t type,    string_t tag,
 void gdt_fatal(string_t tag, string_t format, ...);
 
 /* Immediately exit the program, with the specified error code.
- * Calling this will not invoke gdt_hook_hidden() or gdt_hook_exit(). 
- */
+ * Calling this will not invoke gdt_hook_hidden(). */
 void gdt_exit(exit_type_t type);
 
 // Get a filesystem path to the persistent storage directory reserved for the app

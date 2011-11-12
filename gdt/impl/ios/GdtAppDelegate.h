@@ -22,10 +22,11 @@
  * THE SOFTWARE.
  */
 
+#import "GdtView.h"
 #import <UIKit/UIKit.h>
 
 @interface GdtAppDelegate : NSObject <UIApplicationDelegate> {
-  @private UIView*   view;
+  @private GdtView*   view;
   @private UIWindow* window;
 }
 

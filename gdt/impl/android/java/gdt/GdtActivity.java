@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
+
 package gdt;
 
 import java.io.FileInputStream;
@@ -56,44 +56,102 @@ public abstract class GdtActivity extends Activity {
     _view = new GdtView(this);
     setContentView(_view); 
   }
+  
+  @Override
+  protected void onResume() {
+    super.onPause();
+    _view.doResume();
+  }
   @Override
   protected void onPause() {
     super.onPause();
-    _view.onPause();
-    synchronized(GdtView.lock) {
-    	Native.hide(false);
-    }
+    _view.doPause();
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    _view.onResume();
+    _view.doStart();
   }
   @Override
-  protected void onResume() {
-    super.onResume();
-    _view.onResume();
+  protected void onStop() {
+    super.onStop();
+    _view.onPause();
+    _view.doStop();
   }
 } 
  
 final class GdtView extends GLSurfaceView { 
-  final static Object lock = new Object();
+  private final Object lock = new Object();
+  private int _w = -1;
+  private int _h = -1;
+  private boolean _newGL;
+  private boolean _hasDelayedActive = false;
+  
+  public void doResume() {
+    synchronized(lock) {
+      if (_w == -1)
+    	  _hasDelayedActive = true;
+      else
+    	  activate();
+    } 
+  }
+  public void doPause() {
+    synchronized(lock) { Native.inactive(); }    
+  }
+  
+  public void doStart() {
+    synchronized(lock) {
+      if (_w != -1)
+        show();
+    }	  
+  }
+  public void doStop() {
+    synchronized(lock) { Native.hidden(); }
+  }  
   
   public GdtView(final Context ctx) {
     super(ctx);
+    synchronized(lock) { Native.init(ctx); }
     setEGLContextClientVersion(2);
     setRenderer(new Renderer() {
       public void onSurfaceCreated(GL10 _, EGLConfig __) {
-        synchronized(lock) { Native.init(ctx); }
+        synchronized(lock) { _newGL = true; }
       }
       public void onSurfaceChanged(GL10 _, int width, int height) {
-        synchronized(lock) { Native.eventResize(width, height); }
+        synchronized(lock) {
+          if(_w != width && _h != height) {
+            _w = width;
+            _h = height;
+            show();
+          } 
+        }
       } 
       public void onDrawFrame(GL10 _) { 
         synchronized(lock) { Native.render(); }
       } 
     });
   } 
+
+
   public boolean onTouchEvent(final MotionEvent ev) {
     synchronized(lock) { 
       Native.eventTouch(ev.getAction(), ev.getX(), ev.getY());
     }
     return true;
+  }
+  
+  private void show() {
+    Native.visible(_newGL, _w, _h);	  
+    _newGL = false;
+    if (_hasDelayedActive) 
+      activate();
+  }    
+  
+  private void activate() {
+    Native.active();
+	_hasDelayedActive = false;	  
   }
 }
 
@@ -108,9 +166,11 @@ final class Native {
   
   static native void initialize(String cacheDir, String storageDir);
   static native void render();
-  static native void hide(boolean exitToo);   
+  static native void hidden();
+  static native void active(); 
+  static native void inactive(); 
   static native void eventTouch(int what, float x, float y);
-  static native void eventResize(int width, int height);  
+  static native void visible(boolean newSurface, int width, int height);  
   
   static void init(Context ctx) {
     _ctx = ctx;

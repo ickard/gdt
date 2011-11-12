@@ -40,7 +40,6 @@
 
 
 touchhandler_t touch_cb = NULL;
-int __h;
 string_t resourceDir;
 string_t storageDir;
 string_t cacheDir;
@@ -167,6 +166,17 @@ string_t gdt_get_cache_directory_path(void) {
     return cacheDir;
 }
 
+static bool _visible = false;
+static int _w = -1;
+static int _h = -1;
+
+-(void)visible:(BOOL)makeVisible {
+    if (makeVisible) gdt_hook_visible(false, _w, _h);
+    else gdt_hook_hidden();
+    
+    _visible = makeVisible? true : false;
+}
+
 void gdt_gc_hint(void) {
 }
 
@@ -207,7 +217,8 @@ uint64_t gdt_time_ns(void) {
         cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
         
         gdt_hook_initialize();
-        gdt_hook_visible(CGRectGetWidth(frame), __h = CGRectGetHeight(frame));
+        gdt_hook_visible(true, _w = CGRectGetWidth(frame), _h = CGRectGetHeight(frame));
+        _visible = true;
         
         CADisplayLink* link = [CADisplayLink displayLinkWithTarget:self
                                              selector:@selector(drawView:)];
@@ -225,7 +236,8 @@ uint64_t gdt_time_ns(void) {
 
 -(void)drawView:(CADisplayLink*)_
 {
-    gdt_hook_render();
+    if (_visible)
+        gdt_hook_render();
     
     [ctx presentRenderbuffer:GL_RENDERBUFFER];
 }
@@ -234,7 +246,7 @@ uint64_t gdt_time_ns(void) {
 {
     if (touch_cb) {
         CGPoint where = [[touches anyObject] locationInView:self];
-        touch_cb(type, where.x, __h-where.y);    
+        touch_cb(type, where.x, _h-where.y);    
     }
 }
 

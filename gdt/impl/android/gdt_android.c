@@ -118,10 +118,17 @@ void Java_gdt_Native_render(JNIEnv* _, jclass __) {
   gdt_hook_render();
 }
 
-void Java_gdt_Native_hide(JNIEnv* _, jclass __, jboolean exitToo) {
-  gdt_hook_hidden(exitToo);
-  if (exitToo)
-    gdt_hook_exit();
+void Java_gdt_Native_hidden(JNIEnv* _, jclass __) {
+  gdt_hook_hidden();
+}
+
+void Java_gdt_Native_active(JNIEnv* _, jclass __) {
+  gdt_hook_active();
+}
+
+void Java_gdt_Native_inactive(JNIEnv* _, jclass __) {
+  gdt_hook_inactive();
+  gdt_hook_save_state();
 }
 
 void Java_gdt_Native_eventTouch(JNIEnv* _, jclass __, jint what, jfloat x, jfloat y) {
@@ -132,9 +139,9 @@ void Java_gdt_Native_eventTouch(JNIEnv* _, jclass __, jint what, jfloat x, jfloa
   }
 }
 
-void Java_gdt_Native_eventResize(JNIEnv* _, jclass __, jint width, jint height) {
+void Java_gdt_Native_visible(JNIEnv* _, jclass __, jboolean newSurface, jint width, jint height) {
   _screenHeight = height;
-  gdt_hook_visible(width, height);
+  gdt_hook_visible(newSurface, width, height);
 }
 
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {

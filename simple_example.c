@@ -50,6 +50,16 @@ int _height;
 GLuint _offsetUniform;
 #define LOG(args...) gdt_log(LOG_NORMAL, TAG, args)
 #define SIZE 0.3
+#define ASSERT(COND) if (!(COND)) gdt_fatal(TAG, "Assertion failed in %s (%s)", __PRETTY_FUNCTION__, #COND)
+
+typedef enum {
+	STATE_NOT_INITIALIZED,
+	STATE_INITIALIZED_NOT_VISIBLE,
+	STATE_INITIALIZED_VISIBLE_NOT_ACTIVE,
+	STATE_INITIALIZED_VISIBLE_ACTIVE,
+} state_t;
+
+state_t _state = STATE_NOT_INITIALIZED;
 
 static GLuint compileShader(string_t shaderCode, GLenum type) {
     GLuint shader = glCreateShader(type);
@@ -127,60 +137,94 @@ static void on_touch(touch_type_t what, int screenX, int screenY) {
 }
 
 void gdt_hook_initialize() {
-    LOG("started");
+	ASSERT(_state == STATE_NOT_INITIALIZED);
+	_state = STATE_INITIALIZED_NOT_VISIBLE;
+
+    LOG("initialize");
 
     gdt_set_callback_touch(&on_touch);
 }
 
-void gdt_hook_exit() {
-    LOG("exiting");
-}
+void gdt_hook_visible(bool newSurface, int width, int height) {
+	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
+	_state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
 
-void gdt_hook_visible(int width, int height) {
-    LOG("visible, screen w=%d h=%d", width, height);
+    LOG("visible, newSurface=%s, screen w=%d h=%d", newSurface? "true" : "false", width, height);
 
-    LOG("storage dir path = %s", gdt_get_storage_directory_path());
-    LOG("cache dir path = %s", gdt_get_cache_directory_path());
+    if (newSurface) {
+        GLuint program = linkProgram();
 
+        _offsetUniform = glGetUniformLocation(program, "offset");
+        GLuint positionAttrib = glGetAttribLocation(program, "position");
 
-    GLuint program = linkProgram();
+        static const GLfloat v[] = { 0, SIZE,
+                                     0, 0,
+                                     SIZE, SIZE,
+                                     SIZE, 0    };
+        GLuint vertexBuf;
+        glGenBuffers(1, &vertexBuf);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+
+        static const GLubyte i[] = { 0, 1, 2, 3 };
+        GLuint indexBuf;
+        glGenBuffers(1, &indexBuf);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuf);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i), i, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(positionAttrib);
+        glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+
+        glUseProgram(program);
+
+        glClearColor(0.4, 0.8, 0.4, 1);
+    }
 
     _width = width;
     _height = height;
-    _offsetUniform = glGetUniformLocation(program, "offset");
-    GLuint positionAttrib = glGetAttribLocation(program, "position");
-
-    static const GLfloat v[] = { 0, SIZE,
-                                 0, 0,
-                                 SIZE, SIZE,
-                                 SIZE, 0    };
-    GLuint vertexBuf;
-    glGenBuffers(1, &vertexBuf);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-
-    static const GLubyte i[] = { 0, 1, 2, 3 };
-    GLuint indexBuf;
-    glGenBuffers(1, &indexBuf);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuf);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i), i, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-
-    glViewport(0, 0, width, height);
-    glClearColor(0.4, 0.8, 0.4, 1);
-    glUseProgram(program);
+    glViewport(0, 0, _width, _height);
 }
 
-void gdt_hook_hidden(bool exiting) {
+void gdt_hook_active() {
+	ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE);
+	_state = STATE_INITIALIZED_VISIBLE_ACTIVE;
+
+	LOG("active");
+}
+
+void gdt_hook_inactive() {
+	ASSERT(_state == STATE_INITIALIZED_VISIBLE_ACTIVE);
+	_state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
+
+	LOG("inactive");
+}
+
+void gdt_hook_save_state() {
+#ifdef GDT_PLATFORM_ANDROID
+	ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE);
+#endif
+
+#ifdef GDT_PLATFORM_IOS
+	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
+#endif
+
+	LOG("save_state");
+}
+
+void gdt_hook_hidden() {
+    ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE);
+    _state = STATE_INITIALIZED_NOT_VISIBLE;
+
+
     LOG("hidden");
 }
 
 void gdt_hook_render() {
+	ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE || _state == STATE_INITIALIZED_VISIBLE_ACTIVE);
+
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUniform2f(_offsetUniform, _x, _y);
-    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, NULL);
+    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, NULL); 
 }
 

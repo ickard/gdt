@@ -31,5 +31,6 @@
 }
 
 -(void)drawView:(CADisplayLink*)_;
+-(void)visible:(BOOL)makeVisible;
 
 @end

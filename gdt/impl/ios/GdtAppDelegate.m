@@ -25,8 +25,30 @@
 #import <UIKit/UIKit.h>
 #import "GdtAppDelegate.h"
 #import "GdtView.h"
+#include "gdt.h"
 
 @implementation GdtAppDelegate
+
+-(void)applicationDidBecomeActive:(UIApplication *)_
+{
+  gdt_hook_active();
+}
+
+-(void)applicationWillResignActive:(UIApplication *)_
+{
+  gdt_hook_inactive();
+}
+
+-(void)applicationWillEnterForeground:(UIApplication *)_
+{
+  [view visible:YES];
+}
+
+-(void)applicationDidEnterBackground:(UIApplication *)_
+{
+  [view visible:NO];
+  gdt_hook_save_state();
+}
 
 -(void)applicationDidFinishLaunching :(UIApplication*) _
 {
