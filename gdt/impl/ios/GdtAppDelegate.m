@@ -27,31 +27,54 @@
 #import "GdtView.h"
 #include "gdt.h"
 
+static GdtAppDelegate* _instance = nil;
+static accelerometerhandler_t cb_accelerometer = NULL;
+
+void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event) {
+  cb_accelerometer = on_accelerometer_event;
+
+  UIAccelerometer* a = [UIAccelerometer sharedAccelerometer];
+  a.delegate = _instance;
+}
+
 @implementation GdtAppDelegate
 
--(void)applicationDidBecomeActive:(UIApplication *)_
+-(void)applicationDidBecomeActive:(UIApplication*)_
 {
   gdt_hook_active();
 }
 
--(void)applicationWillResignActive:(UIApplication *)_
+-(void)applicationWillResignActive:(UIApplication*)_
 {
   gdt_hook_inactive();
 }
 
--(void)applicationWillEnterForeground:(UIApplication *)_
+-(void)applicationWillEnterForeground:(UIApplication*)_
 {
   [view visible:YES];
 }
 
--(void)applicationDidEnterBackground:(UIApplication *)_
+-(void)applicationDidEnterBackground:(UIApplication*)_
 {
   [view visible:NO];
   gdt_hook_save_state();
 }
 
+-(void)accelerometer:(UIAccelerometer*)_ didAccelerate:(UIAcceleration*)a {
+  static accelerometer_data_t v;
+  if (cb_accelerometer) {
+    v.x = a.x;
+    v.y = a.y;
+    v.z = a.z;
+    v.time = a.timestamp;
+    cb_accelerometer(&v);
+  }
+}
+
 -(void)applicationDidFinishLaunching :(UIApplication*) _
 {
+  _instance = self;
+
   CGRect bounds = [[UIScreen mainScreen] bounds];
   window        = [[UIWindow alloc] initWithFrame:bounds];
   view          = [[GdtView alloc] initWithFrame: bounds];

@@ -25,7 +25,7 @@
 #import "GdtView.h"
 #import <UIKit/UIKit.h>
 
-@interface GdtAppDelegate : NSObject <UIApplicationDelegate> {
+@interface GdtAppDelegate : NSObject <UIApplicationDelegate,UIAccelerometerDelegate> {
   @private GdtView*   view;
   @private UIWindow* window;
 }

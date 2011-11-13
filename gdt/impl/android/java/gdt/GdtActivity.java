@@ -28,12 +28,18 @@ package gdt;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.List;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView; 
@@ -72,6 +78,12 @@ public abstract class GdtActivity extends Activity {
   }
 
   @Override
+  protected void onRestart() {
+    super.onRestart();
+    Native.resumeEvents();
+  }
+  
+  @Override
   protected void onStart() {
     super.onStart();
     _view.onResume();
@@ -81,6 +93,7 @@ public abstract class GdtActivity extends Activity {
   protected void onStop() {
     super.onStop();
     _view.onPause();
+    Native.suspendEvents();
     _view.doStop();
   }
 } 
@@ -167,19 +180,35 @@ final class Native {
   
   private Native() { } 
   
+  static SensorEventListener _accelerometerListener = new SensorEventListener() {
+	@Override
+	public void onSensorChanged(SensorEvent e) {
+	  eventAccelerometer(e.timestamp/(double)1e9, e.values[0], e.values[1], e.values[2]);
+	}
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+	}
+  };
+  
+  
   static native void initialize(String cacheDir, String storageDir);
   static native void render();
   static native void hidden();
   static native void active(); 
   static native void inactive(); 
   static native void eventTouch(int what, float x, float y);
+  static native void eventAccelerometer(double t, float x, float y, float z);
   static native void visible(boolean newSurface, int width, int height);  
   
   static InputMethodManager _inputMethodManager;
+  static SensorManager _sensorManager;
+  static Sensor _accelerometer;
+  static boolean _subscribedAccelerometer = false;
   
   static void init(Context ctx) {
     _ctx = ctx;
     _inputMethodManager = (InputMethodManager) _ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+    _sensorManager = (SensorManager)_ctx.getSystemService(Context.SENSOR_SERVICE);
     initialize(_ctx.getCacheDir().getPath(), _ctx.getFilesDir().getPath());
   }
   
@@ -252,7 +281,37 @@ final class Native {
       _inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
   }
   
+  static void subscribeAccelerometer(boolean subscribe) {
+    if (subscribe)
+      _sensorManager.registerListener(_accelerometerListener, _accelerometer, SensorManager.SENSOR_DELAY_GAME);
+    else
+      _sensorManager.unregisterListener(_accelerometerListener);
+  }
+  
   static void gcCollect() {
     System.gc();
   }
+  
+  static void eventSubscribe(int eventId, boolean subscribe) {
+	  if (eventId == 0) { // accelerometer
+      if (_accelerometer == null) {
+        List<Sensor> xs = _sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+        if (xs.isEmpty())
+          return;
+        _accelerometer = xs.get(0);
+      }
+      subscribeAccelerometer(subscribe);
+      _subscribedAccelerometer = subscribe;   
+	  }
+  }
+  
+  public static void suspendEvents() {
+    if (_subscribedAccelerometer)
+      subscribeAccelerometer(false);
+  }
+  
+  public static void resumeEvents() {
+    if (_subscribedAccelerometer)
+      subscribeAccelerometer(true);
+  }  
 }

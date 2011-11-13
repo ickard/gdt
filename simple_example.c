@@ -186,6 +186,10 @@ static bool save_state() {
 }
 
 
+static void on_accelerometer_event(accelerometer_data_t* a) {
+    LOG("accelerometer: x=%1.2f y=%1.2f z=%1.2f time=%1.3f", a->x, a->y, a->z, a->time);
+}
+
 void gdt_hook_initialize() {
 	ASSERT(_state == STATE_NOT_INITIALIZED);
 	_state = STATE_INITIALIZED_NOT_VISIBLE;
@@ -201,7 +205,10 @@ void gdt_hook_initialize() {
     
     gdt_set_callback_touch(&on_touch);
     gdt_set_callback_text(&on_text_input);
+    //gdt_set_callback_accelerometer(&on_accelerometer_event);
 }
+
+
 
 
 void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeight) {

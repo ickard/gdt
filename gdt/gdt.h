@@ -79,6 +79,14 @@ typedef struct resource* resource_t;
 struct audioplayer;
 typedef struct audioplayer* audioplayer_t;
 
+typedef struct {
+  float x;
+  float y;
+  float z;
+  double time; // in seconds
+} accelerometer_data_t; 
+
+typedef void (*accelerometerhandler_t)(accelerometer_data_t*);
 typedef void (*touchhandler_t)(touch_type_t, int, int);
 typedef void (*texthandler_t)(string_t);
 
@@ -182,6 +190,7 @@ void gdt_hook_hidden(void);
  
 void gdt_set_callback_touch(touchhandler_t on_touch);
 void gdt_set_callback_text(texthandler_t on_text_input);
+void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event);
 string_t gdt_backspace();
 
 

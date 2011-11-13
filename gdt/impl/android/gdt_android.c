@@ -49,6 +49,7 @@ string_t playerCreateSig = "(Ljava/lang/String;)Ljava/lang/Object;";
 string_t playerDestroySig = "(Landroid/media/MediaPlayer;)V";
 string_t playerPlaySig = "(Landroid/media/MediaPlayer;)Z";
 string_t setKbdModeSig = "(I)V";
+string_t eventSubscribeSig = "(IZ)V";
 
 string_t cacheDir;
 string_t storageDir;
@@ -64,6 +65,30 @@ jmethodID playerCreate;
 jmethodID playerDestroy;
 jmethodID playerPlay;
 jmethodID setKbdMode;
+jmethodID eventSubscribe;
+
+static accelerometerhandler_t cb_accelerometer = NULL;
+
+void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event) {
+  if (on_accelerometer_event && !cb_accelerometer)
+    (*env)->CallStaticVoidMethod(env, cls, eventSubscribe, 0, true);
+  else if (!on_accelerometer_event && cb_accelerometer)
+    (*env)->CallStaticVoidMethod(env, cls, eventSubscribe, 0, false);
+
+  cb_accelerometer = on_accelerometer_event;
+}
+
+void Java_gdt_Native_eventAccelerometer(JNIEnv* _, jclass __, jdouble time, jfloat x, jfloat y, jfloat z) {
+  static accelerometer_data_t a;
+  if (cb_accelerometer) {
+    a.x = x;
+	a.y = y;
+	a.z = z;
+	a.time = time;
+	cb_accelerometer(&a);
+  }
+}
+
 
 void gdt_set_callback_text(texthandler_t on_text_input) {
 
@@ -115,7 +140,7 @@ void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz, jstring cachePath, jstr
     playerCreate = (*env)->GetStaticMethodID(env, cls, "playerCreate", playerCreateSig);
     playerDestroy = (*env)->GetStaticMethodID(env, cls, "playerDestroy", playerDestroySig);
     playerPlay = (*env)->GetStaticMethodID(env, cls, "playerPlay", playerPlaySig);
-
+    eventSubscribe = (*env)->GetStaticMethodID(env, cls, "eventSubscribe", eventSubscribeSig);
     cacheDir = (*env)->GetStringUTFChars(env, cachePath, NULL);
     storageDir = (*env)->GetStringUTFChars(env, storagePath, NULL);
 
