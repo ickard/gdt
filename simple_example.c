@@ -55,10 +55,10 @@ GLuint _offsetUniform;
 #define ASSERT(COND) if (!(COND)) gdt_fatal(TAG, "Assertion failed in %s (%s)", __PRETTY_FUNCTION__, #COND)
 
 typedef enum {
-	STATE_NOT_INITIALIZED,
-	STATE_INITIALIZED_NOT_VISIBLE,
-	STATE_INITIALIZED_VISIBLE_NOT_ACTIVE,
-	STATE_INITIALIZED_VISIBLE_ACTIVE,
+    STATE_NOT_INITIALIZED,
+    STATE_INITIALIZED_NOT_VISIBLE,
+    STATE_INITIALIZED_VISIBLE_NOT_ACTIVE,
+    STATE_INITIALIZED_VISIBLE_ACTIVE,
 } state_t;
 
 state_t _state = STATE_NOT_INITIALIZED;
@@ -191,8 +191,8 @@ static void on_accelerometer_event(accelerometer_data_t* a) {
 }
 
 void gdt_hook_initialize() {
-	ASSERT(_state == STATE_NOT_INITIALIZED);
-	_state = STATE_INITIALIZED_NOT_VISIBLE;
+    ASSERT(_state == STATE_NOT_INITIALIZED);
+    _state = STATE_INITIALIZED_NOT_VISIBLE;
 
     LOG("initialize");    
 
@@ -212,8 +212,8 @@ void gdt_hook_initialize() {
 
 
 void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeight) {
-	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
-	_state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
+    ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
+    _state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
 
     LOG("visible, newContext=%s, screen w=%d h=%d", newContext? "true" : "false", surfaceWidth, surfaceHeight);
 
@@ -253,29 +253,29 @@ void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeig
 }
 
 void gdt_hook_active() {
-	ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE);
-	_state = STATE_INITIALIZED_VISIBLE_ACTIVE;
+    ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE);
+    _state = STATE_INITIALIZED_VISIBLE_ACTIVE;
 
-	LOG("active");
+    LOG("active");
 }
 
 void gdt_hook_inactive() {
-	ASSERT(_state == STATE_INITIALIZED_VISIBLE_ACTIVE);
-	_state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
+    ASSERT(_state == STATE_INITIALIZED_VISIBLE_ACTIVE);
+    _state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
 
-	LOG("inactive");
+    LOG("inactive");
 }
 
 void gdt_hook_save_state() {
 #ifdef GDT_PLATFORM_ANDROID
-	ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE);
+    ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE);
 #endif
 
 #ifdef GDT_PLATFORM_IOS
-	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
+    ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
 #endif
 
-	LOG("save_state");
+    LOG("save_state");
     
     LOG(save_state()? "saved state": "failed to save state");
 }
@@ -289,7 +289,7 @@ void gdt_hook_hidden() {
 }
 
 void gdt_hook_render() {
-	ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE || _state == STATE_INITIALIZED_VISIBLE_ACTIVE);
+    ASSERT(_state == STATE_INITIALIZED_VISIBLE_NOT_ACTIVE || _state == STATE_INITIALIZED_VISIBLE_ACTIVE);
 
     glClear(GL_COLOR_BUFFER_BIT);
 
