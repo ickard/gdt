@@ -79,8 +79,8 @@ public abstract class GdtActivity extends Activity {
 
   @Override
   protected void onRestart() {
-    super.onRestart();
     Native.resumeEvents();
+    super.onRestart();
   }
   
   @Override
@@ -93,8 +93,8 @@ public abstract class GdtActivity extends Activity {
   protected void onStop() {
     super.onStop();
     _view.onPause();
-    Native.suspendEvents();
     _view.doStop();
+    Native.suspendEvents();    
   }
 } 
  
