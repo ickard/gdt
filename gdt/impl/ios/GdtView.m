@@ -48,7 +48,7 @@ static int _w = -1;
 static int _h = -1;
 static string_t _backspace;
 
-string_t gdt_backspace() {
+string_t gdt_backspace(void) {
     return _backspace;
 }
 

@@ -209,14 +209,15 @@ uint64_t gdt_time_ns(void);
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);
 
 // Special string that represents backspace
-string_t gdt_backspace();
+string_t gdt_backspace(void);
 
-void gdt_open_url                 (string_t url);
+void gdt_open_url(string_t url);
     
-void gdt_log                      (log_type_t type,    string_t tag,
-								   string_t format, ...);
-void gdt_logv                     (log_type_t type,    string_t tag,
-								   string_t format, va_list args);
+void gdt_log     (log_type_t type  ,  string_t tag,
+                  string_t   format,           ...);
+                  
+void gdt_logv    (log_type_t type  ,  string_t tag,
+                  string_t   format,  va_list  args);
 
 // Log (as LOG_ERROR), and then exit with EXIT_FAIL
 void gdt_fatal(string_t tag, string_t format, ...);
@@ -262,9 +263,9 @@ void       gdt_resource_unload(resource_t resource);
  */
 
 audioplayer_t gdt_audioplayer_create(string_t resourcePath);
-void gdt_audioplayer_destroy(audioplayer_t player);
-bool gdt_audioplayer_play(audioplayer_t player);
-/*
+void          gdt_audioplayer_destroy(audioplayer_t player);
+bool          gdt_audioplayer_play(audioplayer_t player);
+/* 
 bool gdt_audioplayer_change_source(audioplayer_t player, string_t resourcePath);
 bool gdt_audioplayer_pause(audioplayer_t player);
 bool gdt_audioplayer_set_position(audioplayer_t player, double seconds);

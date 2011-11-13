@@ -93,7 +93,8 @@ void Java_gdt_Native_eventAccelerometer(JNIEnv* _, jclass __, jdouble time, jflo
 void gdt_set_callback_text(texthandler_t on_text_input) {
 
 }
-string_t gdt_backspace() {
+
+string_t gdt_backspace(void) {
 
 }
 
