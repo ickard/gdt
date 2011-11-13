@@ -191,7 +191,6 @@ void gdt_hook_hidden(void);
 void gdt_set_callback_touch(touchhandler_t on_touch);
 void gdt_set_callback_text(texthandler_t on_text_input);
 void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event);
-string_t gdt_backspace();
 
 
 // ------------------------------------
@@ -208,6 +207,10 @@ void gdt_gc_hint(void);
 // Return the time in nanoseconds at the highest precision available.
 uint64_t gdt_time_ns(void);
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);
+
+// Special string that represents backspace
+string_t gdt_backspace();
+
 void gdt_open_url                 (string_t url);
     
 void gdt_log                      (log_type_t type,    string_t tag,
