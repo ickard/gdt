@@ -51,26 +51,26 @@ typedef const char* string_t;
 
 
 typedef enum {
-  KBD_HIDDEN,
-  KBD_VISIBLE
+	KBD_HIDDEN,
+	KBD_VISIBLE
 } keyboard_mode_t;
 
 typedef enum {
-  TOUCH_DOWN,
-  TOUCH_UP,
-  TOUCH_MOVE
+	TOUCH_DOWN,
+	TOUCH_UP,
+	TOUCH_MOVE
 } touch_type_t;
 
 typedef enum {
-  LOG_DEBUG,
-  LOG_NORMAL,
-  LOG_WARNING,
-  LOG_ERROR
+	LOG_DEBUG,
+	LOG_NORMAL,
+	LOG_WARNING,
+	LOG_ERROR
 } log_type_t;
 
 typedef enum {
-  EXIT_SUCCEED,
-  EXIT_FAIL
+	EXIT_SUCCEED,
+	EXIT_FAIL
 } exit_type_t;
 
 struct resource;
@@ -80,10 +80,10 @@ struct audioplayer;
 typedef struct audioplayer* audioplayer_t;
 
 typedef struct {
-  float x;
-  float y;
-  float z;
-  double time; // in seconds
+	float x;
+	float y;
+	float z;
+	double time; // in seconds
 } accelerometer_data_t; 
 
 typedef void (*accelerometerhandler_t)(accelerometer_data_t*);
@@ -215,7 +215,7 @@ void gdt_open_url(string_t url);
     
 void gdt_log     (log_type_t type  ,  string_t tag,
                   string_t   format,           ...);
-                  
+
 void gdt_logv    (log_type_t type  ,  string_t tag,
                   string_t   format,  va_list  args);
 

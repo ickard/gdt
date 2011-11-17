@@ -27,7 +27,7 @@
 #include <OpenGLES/ES2/glext.h>
 
 @interface GdtView : UIView<UIKeyInput> {
-    @private EAGLContext* ctx; 
+	@private EAGLContext* ctx; 
 }
 
 -(void)drawView:(CADisplayLink*)_;

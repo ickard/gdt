@@ -49,69 +49,68 @@ static int _h = -1;
 static string_t _backspace;
 
 string_t gdt_backspace(void) {
-    return _backspace;
+	return _backspace;
 }
 
 static NSString* logTypeToFormatString(log_type_t type) {
-    switch(type) {
-        case LOG_ERROR:
-            return @"%s: [error] %s";
-        case LOG_WARNING:
-            return @"%s: [warning] %s";
-        case LOG_DEBUG:
-            return @"%s: [debug] %s";
-        case LOG_NORMAL:
-            return @"%s: %s";
-    } 
+	switch(type) {
+		case LOG_ERROR:
+			return @"%s: [error] %s";
+		case LOG_WARNING:
+			return @"%s: [warning] %s";
+		case LOG_DEBUG:
+			return @"%s: [debug] %s";
+		case LOG_NORMAL:
+			return @"%s: %s";
+	} 
 }
 
 void gdt_logv(log_type_t type, string_t tag, string_t format, va_list args) {
-    NSString* s = [NSString stringWithFormat:
-                       logTypeToFormatString(type), tag, format];
-        
-    NSLogv(s, args);     
+	NSString* s = [NSString stringWithFormat:logTypeToFormatString(type), tag, format];
+		
+	NSLogv(s, args);	 
 }
 
 void gdt_exit(exit_type_t type) {
-    [NSThread exit];
+	[NSThread exit];
 }
 
 
 void gdt_open_url(string_t url) {
-    NSString* s   = [NSString stringWithUTF8String: url];
-    NSURL*    u   = [NSURL URLWithString: s];
-    
-    [[UIApplication sharedApplication] openURL: u];
+	NSString* s   = [NSString stringWithUTF8String: url];
+	NSURL*	u   = [NSURL URLWithString: s];
+	
+	[[UIApplication sharedApplication] openURL: u];
 }
 
 void gdt_set_callback_text(texthandler_t f) {
-    text_cb = f;
+	text_cb = f;
 }
 
 static void text_input(string_t text) {
-    if (text_cb)
-        text_cb(text);
+	if (text_cb)
+		text_cb(text);
 }
 
 void gdt_set_callback_touch(touchhandler_t f) {
-    touch_cb = f;
+	touch_cb = f;
 }
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
-    switch(mode) {
-    case KBD_VISIBLE:
-        [_view becomeFirstResponder];
-        break;
-    case KBD_HIDDEN:
-        [_view resignFirstResponder];
-        break;
-    };
+	switch(mode) {
+	case KBD_VISIBLE:
+		[_view becomeFirstResponder];
+		break;
+	case KBD_HIDDEN:
+		[_view resignFirstResponder];
+		break;
+	};
 }
 
 
 
 struct resource {
-  int32_t len;
-  void*   data;
+	int32_t len;
+	void*   data;
 };
 
 void* gdt_resource_bytes(resource_t res) {
@@ -123,67 +122,67 @@ int32_t gdt_resource_length(resource_t res) {
 }
 
 resource_t gdt_resource_load(string_t resourcePath) {
-    char* s;
-    asprintf(&s, "%s%s", resourceDir, resourcePath);
-    
-    int fd = open(s, O_RDONLY);
-    free(s);
-    if (fd == -1) return NULL;
-    resource_t res = (resource_t)malloc(sizeof(struct resource));
-    struct stat info;
-    fstat(fd, &info);
-    res->len = info.st_size;
-    res->data = mmap(NULL, res->len, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd);
+	char* s;
+	asprintf(&s, "%s%s", resourceDir, resourcePath);
+	
+	int fd = open(s, O_RDONLY);
+	free(s);
+	if (fd == -1) return NULL;
+	resource_t res = (resource_t)malloc(sizeof(struct resource));
+	struct stat info;
+	fstat(fd, &info);
+	res->len = info.st_size;
+	res->data = mmap(NULL, res->len, PROT_READ, MAP_PRIVATE, fd, 0);
+	close(fd);
 
-    return res;
+	return res;
 }
 
-void gdt_resource_unload(resource_t resource) {    
-    munmap(gdt_resource_bytes(resource), gdt_resource_length(resource));
-    
-    free(resource);
+void gdt_resource_unload(resource_t resource) {	
+	munmap(gdt_resource_bytes(resource), gdt_resource_length(resource));
+	
+	free(resource);
 }
 
 
 
 struct audioplayer {
-    AVAudioPlayer* player;
+	AVAudioPlayer* player;
 };
 
 audioplayer_t gdt_audioplayer_create(string_t p) {
-    NSString* path = [NSString stringWithFormat:@"%s%s", resourceDir, p];
-    NSURL* url = [NSURL fileURLWithPath:path];
-    
-    AVAudioPlayer* player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    
-    if(player == nil)
-        return NULL;
-        
-    [player prepareToPlay];
-    
-    audioplayer_t ap = (audioplayer_t)malloc(sizeof(struct audioplayer));
-    ap->player = player;
-    
-    return ap;
+	NSString* path = [NSString stringWithFormat:@"%s%s", resourceDir, p];
+	NSURL* url = [NSURL fileURLWithPath:path];
+	
+	AVAudioPlayer* player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+	
+	if(player == nil)
+		return NULL;
+		
+	[player prepareToPlay];
+	
+	audioplayer_t ap = (audioplayer_t)malloc(sizeof(struct audioplayer));
+	ap->player = player;
+	
+	return ap;
 }
 
 void gdt_audioplayer_destroy(audioplayer_t player) {
-    [player->player release];
-    free(player);
+	[player->player release];
+	free(player);
 }
 
 bool gdt_audioplayer_play(audioplayer_t player) {
-    [player->player play];
-    return true;
+	[player->player play];
+	return true;
 }
 
 string_t gdt_get_storage_directory_path(void) {
-    return storageDir;
+	return storageDir;
 }
 
 string_t gdt_get_cache_directory_path(void) {
-    return cacheDir;
+	return cacheDir;
 }
 
 
@@ -191,126 +190,126 @@ string_t gdt_get_cache_directory_path(void) {
 
 
 -(void)visible:(BOOL)makeVisible {
-    if (makeVisible) gdt_hook_visible(false, _w, _h);
-    else gdt_hook_hidden();
-    
-    _visible = makeVisible? true : false;
+	if (makeVisible) gdt_hook_visible(false, _w, _h);
+	else gdt_hook_hidden();
+	
+	_visible = makeVisible? true : false;
 }
 
 void gdt_gc_hint(void) {
 }
 
 uint64_t gdt_time_ns(void) {
-    struct timeval now;
+	struct timeval now;
 	gettimeofday(&now, NULL);
-    return (uint64_t) now.tv_sec * 1000000000LL + (uint64_t) now.tv_usec * 1000LL;
+	return (uint64_t) now.tv_sec * 1000000000LL + (uint64_t) now.tv_usec * 1000LL;
 }
 
 
 
 -(id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrame:frame];
-    
-    if (self) {
-        CAEAGLLayer* layer = (CAEAGLLayer*)super.layer;
-        layer.opaque = YES;
-        
-        ctx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-        [EAGLContext setCurrentContext:ctx];
-        
-        GLuint fb;
-        glGenFramebuffers(1, &fb);
-        glBindFramebuffer(GL_FRAMEBUFFER, fb);
-        
-        GLuint rb;
-        glGenRenderbuffers(1, &rb);
-        glBindRenderbuffer(GL_RENDERBUFFER, rb);
-        
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-                                     GL_COLOR_ATTACHMENT0,
-                                     GL_RENDERBUFFER,
-                                     rb);
-        
-        [ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
-        
-        resourceDir = [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSASCIIStringEncoding];
-        storageDir = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
-        cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
-        
-        _view = self;
-        _backspace = (string_t)malloc(1);
-        gdt_hook_initialize();
-        gdt_hook_visible(true, _w = CGRectGetWidth(frame), _h = CGRectGetHeight(frame));
-        _visible = true;
-        
-        CADisplayLink* link = [CADisplayLink displayLinkWithTarget:self
-                                             selector:@selector(drawView:)];
-        [link addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-    }
-    
-    return self;
+	self = [super initWithFrame:frame];
+	
+	if (self) {
+		CAEAGLLayer* layer = (CAEAGLLayer*)super.layer;
+		layer.opaque = YES;
+		
+		ctx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+		[EAGLContext setCurrentContext:ctx];
+		
+		GLuint fb;
+		glGenFramebuffers(1, &fb);
+		glBindFramebuffer(GL_FRAMEBUFFER, fb);
+		
+		GLuint rb;
+		glGenRenderbuffers(1, &rb);
+		glBindRenderbuffer(GL_RENDERBUFFER, rb);
+		
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+									 GL_COLOR_ATTACHMENT0,
+									 GL_RENDERBUFFER,
+									 rb);
+		
+		[ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
+		
+		resourceDir = [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSASCIIStringEncoding];
+		storageDir = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
+		cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
+		
+		_view = self;
+		_backspace = (string_t)malloc(1);
+		gdt_hook_initialize();
+		gdt_hook_visible(true, _w = CGRectGetWidth(frame), _h = CGRectGetHeight(frame));
+		_visible = true;
+		
+		CADisplayLink* link = [CADisplayLink displayLinkWithTarget:self
+											 selector:@selector(drawView:)];
+		[link addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+	}
+	
+	return self;
 }
 
 +(Class)layerClass
 {
-    return [CAEAGLLayer class];
+	return [CAEAGLLayer class];
 }
 
 
 -(void)drawView:(CADisplayLink*)_
 {
-    if (_visible)
-        gdt_hook_render();
-    
-    [ctx presentRenderbuffer:GL_RENDERBUFFER];
+	if (_visible)
+		gdt_hook_render();
+	
+	[ctx presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 -(void)handleTouches:(NSSet*)touches withType:(touch_type_t)type 
 {
-    if (touch_cb) {
-        CGPoint where = [[touches anyObject] locationInView:self];
-        touch_cb(type, where.x, _h-where.y);    
-    }
+	if (touch_cb) {
+		CGPoint where = [[touches anyObject] locationInView:self];
+		touch_cb(type, where.x, _h-where.y);	
+	}
 }
 
 -(BOOL)canBecomeFirstResponder {
-    return YES;
+	return YES;
 }
 
 -(BOOL)hasText {
-    return YES;
+	return YES;
 }
 
 -(void)insertText:(NSString *)text {
-    text_input([text cStringUsingEncoding:NSUTF8StringEncoding]);
+	text_input([text cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
 -(void)deleteBackward {
-    text_input(gdt_backspace());
+	text_input(gdt_backspace());
 }
 
 -(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)_
 {
-    [self handleTouches:touches withType:TOUCH_DOWN];
+	[self handleTouches:touches withType:TOUCH_DOWN];
 }
 
 -(void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)_
 {
-    [self handleTouches:touches withType:TOUCH_MOVE];
+	[self handleTouches:touches withType:TOUCH_MOVE];
 }
 
 -(void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)_
 {
-    [self handleTouches:touches withType:TOUCH_UP];
+	[self handleTouches:touches withType:TOUCH_UP];
 }
 
 
 -(void)dealloc
 {
-    [EAGLContext setCurrentContext:nil];
-    [ctx release];
-    [super dealloc];
+	[EAGLContext setCurrentContext:nil];
+	[ctx release];
+	[super dealloc];
 }
 
 @end
