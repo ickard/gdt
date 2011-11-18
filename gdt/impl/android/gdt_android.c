@@ -54,6 +54,7 @@ string_t eventSubscribeSig = "(IZ)V";
 string_t cacheDir;
 string_t storageDir;
 touchhandler_t cb_touch = NULL;
+accelerometerhandler_t cb_accelerometer = NULL;
 jclass cls;
 JNIEnv* env;
 int _screenHeight;
@@ -66,37 +67,6 @@ jmethodID playerDestroy;
 jmethodID playerPlay;
 jmethodID setKbdMode;
 jmethodID eventSubscribe;
-
-static accelerometerhandler_t cb_accelerometer = NULL;
-
-void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event) {
-	if (on_accelerometer_event && !cb_accelerometer)
-		(*env)->CallStaticVoidMethod(env, cls, eventSubscribe, 0, true);
-	else if (!on_accelerometer_event && cb_accelerometer)
-		(*env)->CallStaticVoidMethod(env, cls, eventSubscribe, 0, false);
-
-	cb_accelerometer = on_accelerometer_event;
-}
-
-void Java_gdt_Native_eventAccelerometer(JNIEnv* _, jclass __, jdouble time, jfloat x, jfloat y, jfloat z) {
-	static accelerometer_data_t a;
-	if (cb_accelerometer) {
-		a.x = x;
-	a.y = y;
-	a.z = z;
-	a.time = time;
-	cb_accelerometer(&a);
-	}
-}
-
-
-void gdt_set_callback_text(texthandler_t on_text_input) {
-
-}
-
-string_t gdt_backspace(void) {
-
-}
 
 static touch_type_t mapAction (int what) {
 	switch (what) {
@@ -126,14 +96,13 @@ static int mapType(log_type_t type) {
 
 
 
-
-void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz, jstring cachePath, jstring storagePath) {
+void Java_gdt_Native_initialize(JNIEnv* e, jclass c, jstring cachePath, jstring storagePath) {
+	env = e;
 	static bool initialized = false;
 	if (!initialized) {
 		initialized = true;
 
-		cls = clazz;
-		env = e;
+		cls = (*env)->NewGlobalRef(env, c);
 		openUrl = (*env)->GetStaticMethodID(env, cls, "openUrl", openUrlSig);
 		gcCollect = (*env)->GetStaticMethodID(env, cls, "gcCollect", gcCollectSig);
 		loadAsset = (*env)->GetStaticMethodID(env, cls, "openAsset", openAssetSig);
@@ -144,31 +113,41 @@ void Java_gdt_Native_initialize(JNIEnv* e, jclass clazz, jstring cachePath, jstr
 		eventSubscribe = (*env)->GetStaticMethodID(env, cls, "eventSubscribe", eventSubscribeSig);
 		cacheDir = (*env)->GetStringUTFChars(env, cachePath, NULL);
 		storageDir = (*env)->GetStringUTFChars(env, storagePath, NULL);
-
 		setKbdMode = (*env)->GetStaticMethodID(env, cls, "setKbdMode", setKbdModeSig);
 
 		gdt_hook_initialize();
 	}
 }
 
-void Java_gdt_Native_render(JNIEnv* _, jclass __) {
+void Java_gdt_Native_render(JNIEnv* e, jclass __) {
+	env = e;
 	gdt_hook_render();
 }
 
-void Java_gdt_Native_hidden(JNIEnv* _, jclass __) {
+void Java_gdt_Native_hidden(JNIEnv* e, jclass __) {
+	env = e;
 	gdt_hook_hidden();
 }
 
-void Java_gdt_Native_active(JNIEnv* _, jclass __) {
+void Java_gdt_Native_visible(JNIEnv* e, jclass __, jboolean newSurface, jint width, jint height) {
+	env = e;
+	_screenHeight = height;
+	gdt_hook_visible(newSurface, width, height);
+}
+
+void Java_gdt_Native_active(JNIEnv* e, jclass __) {
+	env = e;
 	gdt_hook_active();
 }
 
-void Java_gdt_Native_inactive(JNIEnv* _, jclass __) {
+void Java_gdt_Native_inactive(JNIEnv* e, jclass __) {
+	env = e;
 	gdt_hook_inactive();
 	gdt_hook_save_state();
 }
 
-void Java_gdt_Native_eventTouch(JNIEnv* _, jclass __, jint what, jfloat x, jfloat y) {
+void Java_gdt_Native_eventTouch(JNIEnv* e, jclass __, jint what, jfloat x, jfloat y) {
+	env = e;
 	if (cb_touch) {
 		touch_type_t action = mapAction(what);
 		if (action != -1)
@@ -176,18 +155,39 @@ void Java_gdt_Native_eventTouch(JNIEnv* _, jclass __, jint what, jfloat x, jfloa
 	}
 }
 
-void Java_gdt_Native_visible(JNIEnv* _, jclass __, jboolean newSurface, jint width, jint height) {
-	_screenHeight = height;
-	gdt_hook_visible(newSurface, width, height);
+void Java_gdt_Native_eventAccelerometer(JNIEnv* e, jclass __, jdouble time, jfloat x, jfloat y, jfloat z) {
+	env = e;
+
+	static accelerometer_data_t a;
+	if (cb_accelerometer) {
+		a.x = x;
+		a.y = y;
+		a.z = z;
+		a.time = time;
+		cb_accelerometer(&a);
+	}
 }
 
-void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
-	(*env)->CallStaticVoidMethod(env, cls, setKbdMode, mode);
+
+
+void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event) {
+	if (on_accelerometer_event && !cb_accelerometer)
+		(*env)->CallStaticVoidMethod(env, cls, eventSubscribe, 0, true);
+	else if (!on_accelerometer_event && cb_accelerometer)
+		(*env)->CallStaticVoidMethod(env, cls, eventSubscribe, 0, false);
+
+	cb_accelerometer = on_accelerometer_event;
 }
 
-void gdt_open_url(string_t url) {
-	(*env)->CallStaticObjectMethod(env, cls, openUrl, (*env)->NewStringUTF(env, url) );
+void gdt_set_callback_text(texthandler_t on_text_input) {
+
 }
+
+void gdt_set_callback_touch(touchhandler_t on_touch) {
+	cb_touch = on_touch;
+}
+
+
 
 void* gdt_resource_bytes(resource_t res) {
 	return res->ptr;
@@ -229,6 +229,8 @@ void gdt_resource_unload(resource_t res) {
 	free(res);
 }
 
+
+
 audioplayer_t gdt_audioplayer_create(string_t p) {
 	if (p == NULL || p[0] != '/')
 		return NULL;
@@ -260,6 +262,8 @@ bool gdt_audioplayer_play(audioplayer_t player) {
 	return (*env)->CallStaticBooleanMethod(env, cls, playerPlay, player->player);
 }
 
+
+
 string_t gdt_get_storage_directory_path(void) {
 	return storageDir;
 }
@@ -268,9 +272,18 @@ string_t gdt_get_cache_directory_path(void) {
 	return cacheDir;
 }
 
-void gdt_set_callback_touch(touchhandler_t on_touch) {
-	cb_touch = on_touch;
+string_t gdt_backspace(void) {
+
 }
+
+void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
+	(*env)->CallStaticVoidMethod(env, cls, setKbdMode, mode);
+}
+
+void gdt_open_url(string_t url) {
+	(*env)->CallStaticObjectMethod(env, cls, openUrl, (*env)->NewStringUTF(env, url) );
+}
+
 
 void gdt_logv(log_type_t type, string_t tag, string_t format, va_list args) {
 	__android_log_vprint(mapType(type), tag, format, args);

@@ -135,6 +135,7 @@ static void load_state() {
 		fclose(file);
 	}
 }
+
 static bool save_state() {
 	FILE* file = fopen(_save_path, "w");
 	if (file == NULL)
@@ -157,25 +158,25 @@ static void on_touch(touch_type_t what, int screenX, int screenY) {
 
 	if (state) {
 		switch (what) {
-		case TOUCH_MOVE:
-			move(x, y);
-			break;
-		case TOUCH_UP:
-			state = 0;
-			break;
-		default: {}
+			case TOUCH_MOVE:
+				move(x, y);
+				break;
+			case TOUCH_UP:
+				state = 0;
+				break;
+			default: {}
 		}
 	} else {
 		switch (what) {
-		case TOUCH_DOWN:
-			if (inside_the_square(x, y)) {
-				state = 1;
-				move(x, y);
-			} else {
-				toggle_kbd();
-			}
-			break;
-		default: {}
+			case TOUCH_DOWN:
+				if (inside_the_square(x, y)) {
+					state = 1;
+					move(x, y);
+				} else {
+					toggle_kbd();
+				}
+				break;
+			default: {}
 		}
 	}
 }
@@ -266,7 +267,7 @@ void gdt_hook_save_state() {
 	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
 #endif
 
-LOG("save_state");
+	LOG("save_state");
 	
 	LOG(save_state()? "saved state": "failed to save state");
 }
