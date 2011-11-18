@@ -34,7 +34,8 @@ void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_even
 	cb_accelerometer = on_accelerometer_event;
 
 	UIAccelerometer* a = [UIAccelerometer sharedAccelerometer];
-	a.delegate = _instance;
+	
+	a.delegate = on_accelerometer_event ? _instance : nil;
 }
 
 @implementation GdtAppDelegate
