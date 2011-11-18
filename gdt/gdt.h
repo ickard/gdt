@@ -116,6 +116,8 @@ void gdt_hook_initialize(void);
  *                     ES surface is ready for use.
  * 
  * The newContext is used to determine if the OpenGL context is freshly created.
+ * The results of gdt_surface_{width/height}() can change only
+ * iff newContext == true
  *
  * This is called
  *   - shortly after gdt_hook_initialize()
@@ -126,7 +128,7 @@ void gdt_hook_initialize(void);
  *   - If newContext is true, prepare the gl environment
  *   - glViewport, and other size related operations
  */
-void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeight);
+void gdt_hook_visible(bool newContext);
 
 /* gdt_hook_active -- The game is in the foreground, it has the focus.
  *
@@ -204,6 +206,9 @@ void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_even
  */
 void gdt_gc_hint(void);
 
+int32_t gdt_surface_width(void);
+int32_t gdt_surface_height(void);
+	
 // Return the time in nanoseconds at the highest precision available.
 uint64_t gdt_time_ns(void);
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);

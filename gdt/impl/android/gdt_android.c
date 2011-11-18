@@ -58,6 +58,7 @@ accelerometerhandler_t cb_accelerometer = NULL;
 jclass cls;
 JNIEnv* env;
 int _screenHeight;
+int _screenWidth;
 jmethodID openUrl;
 jmethodID gcCollect;
 jmethodID loadAsset;
@@ -131,8 +132,9 @@ void Java_gdt_Native_hidden(JNIEnv* e, jclass _) {
 
 void Java_gdt_Native_visible(JNIEnv* e, jclass _, jboolean newSurface, jint width, jint height) {
 	env = e;
+	_screenWidth = width;
 	_screenHeight = height;
-	gdt_hook_visible(newSurface, width, height);
+	gdt_hook_visible(newSurface);
 }
 
 void Java_gdt_Native_active(JNIEnv* e, jclass _) {
@@ -305,3 +307,9 @@ uint64_t gdt_time_ns(void) {
 	return (uint64_t) now.tv_sec * 1000000000LL + (uint64_t) now.tv_nsec;
 }
 
+int32_t gdt_surface_width(void) {
+	return _screenWidth;
+}
+int32_t gdt_surface_height(void) {
+	return _screenHeight;
+}

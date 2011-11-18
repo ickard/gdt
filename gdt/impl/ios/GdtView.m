@@ -48,6 +48,14 @@ static int _w = -1;
 static int _h = -1;
 static string_t _backspace;
 
+int32_t gdt_surface_width(void) {
+	return _w;
+}
+
+int32_t gdt_surface_height(void) {
+	return _h;
+}
+
 string_t gdt_backspace(void) {
 	return _backspace;
 }
@@ -190,7 +198,7 @@ string_t gdt_get_cache_directory_path(void) {
 
 
 -(void)visible:(BOOL)makeVisible {
-	if (makeVisible) gdt_hook_visible(false, _w, _h);
+	if (makeVisible) gdt_hook_visible(false);
 	else gdt_hook_hidden();
 	
 	_visible = makeVisible? true : false;
@@ -240,7 +248,9 @@ uint64_t gdt_time_ns(void) {
 		_view = self;
 		_backspace = (string_t)malloc(1);
 		gdt_hook_initialize();
-		gdt_hook_visible(true, _w = CGRectGetWidth(frame), _h = CGRectGetHeight(frame));
+		_w = CGRectGetWidth(frame);
+		_h = CGRectGetHeight(frame);
+		gdt_hook_visible(true);
 		_visible = true;
 		
 		CADisplayLink* link = [CADisplayLink displayLinkWithTarget:self

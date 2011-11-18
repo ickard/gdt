@@ -206,22 +206,30 @@ void gdt_hook_initialize() {
 	gdt_set_callback_text(&on_text_input);
 	//gdt_set_callback_accelerometer(&on_accelerometer_event);
 }
-void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeight) {
+void gdt_hook_visible(bool newContext) {
 	ASSERT(_state == STATE_INITIALIZED_NOT_VISIBLE);
 	_state = STATE_INITIALIZED_VISIBLE_NOT_ACTIVE;
 
-	LOG("visible, newContext=%s, screen w=%d h=%d", newContext? "true": "false", surfaceWidth, surfaceHeight);
+	LOG("visible, newContext=%s" , newContext? "true": "false");
 
 	if (newContext) {
+		_width = gdt_surface_width();
+		_height = gdt_surface_height();
+		
+		LOG("surface size: width=%d, height=%d", _width, _height);
+		
 		GLuint program = linkProgram();
 
 		_offsetUniform = glGetUniformLocation(program, "offset");
 		GLuint positionAttrib = glGetAttribLocation(program, "position");
 
-		static const GLfloat v[] = { 0, SIZE,
-									 0, 0,
-									 SIZE, SIZE,
-									 SIZE, 0	};
+		static const GLfloat v[] = {
+			0, SIZE,
+			0, 0,
+			SIZE, SIZE,
+			SIZE, 0
+		};
+		
 		GLuint vertexBuf;
 		glGenBuffers(1, &vertexBuf);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
@@ -239,11 +247,12 @@ void gdt_hook_visible(bool newContext, int32_t surfaceWidth, int32_t surfaceHeig
 		glUseProgram(program);
 
 		glClearColor(0.4, 0.8, 0.4, 1);
+		
+
+		glViewport(0, 0, _width, _height);
 	}
 
-	_width = surfaceWidth;
-	_height = surfaceHeight;
-	glViewport(0, 0, _width, _height);
+
 	
 }
 void gdt_hook_active() {
