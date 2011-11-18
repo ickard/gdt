@@ -119,34 +119,34 @@ void Java_gdt_Native_initialize(JNIEnv* e, jclass c, jstring cachePath, jstring 
 	}
 }
 
-void Java_gdt_Native_render(JNIEnv* e, jclass __) {
+void Java_gdt_Native_render(JNIEnv* e, jclass _) {
 	env = e;
 	gdt_hook_render();
 }
 
-void Java_gdt_Native_hidden(JNIEnv* e, jclass __) {
+void Java_gdt_Native_hidden(JNIEnv* e, jclass _) {
 	env = e;
 	gdt_hook_hidden();
 }
 
-void Java_gdt_Native_visible(JNIEnv* e, jclass __, jboolean newSurface, jint width, jint height) {
+void Java_gdt_Native_visible(JNIEnv* e, jclass _, jboolean newSurface, jint width, jint height) {
 	env = e;
 	_screenHeight = height;
 	gdt_hook_visible(newSurface, width, height);
 }
 
-void Java_gdt_Native_active(JNIEnv* e, jclass __) {
+void Java_gdt_Native_active(JNIEnv* e, jclass _) {
 	env = e;
 	gdt_hook_active();
 }
 
-void Java_gdt_Native_inactive(JNIEnv* e, jclass __) {
+void Java_gdt_Native_inactive(JNIEnv* e, jclass _) {
 	env = e;
 	gdt_hook_inactive();
 	gdt_hook_save_state();
 }
 
-void Java_gdt_Native_eventTouch(JNIEnv* e, jclass __, jint what, jfloat x, jfloat y) {
+void Java_gdt_Native_eventTouch(JNIEnv* e, jclass _, jint what, jfloat x, jfloat y) {
 	env = e;
 	if (cb_touch) {
 		touch_type_t action = mapAction(what);
@@ -155,7 +155,7 @@ void Java_gdt_Native_eventTouch(JNIEnv* e, jclass __, jint what, jfloat x, jfloa
 	}
 }
 
-void Java_gdt_Native_eventAccelerometer(JNIEnv* e, jclass __, jdouble time, jfloat x, jfloat y, jfloat z) {
+void Java_gdt_Native_eventAccelerometer(JNIEnv* e, jclass _, jdouble time, jfloat x, jfloat y, jfloat z) {
 	env = e;
 
 	static accelerometer_data_t a;
