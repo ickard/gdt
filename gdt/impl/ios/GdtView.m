@@ -220,6 +220,10 @@ uint64_t gdt_time_ns(void) {
 	self = [super initWithFrame:frame];
 	
 	if (self) {
+		if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+			self.contentScaleFactor = [UIScreen mainScreen].scale;
+		}
+		
 		CAEAGLLayer* layer = (CAEAGLLayer*)super.layer;
 		layer.opaque = YES;
 		
@@ -241,15 +245,22 @@ uint64_t gdt_time_ns(void) {
 		
 		[ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
 		
-		resourceDir = [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSASCIIStringEncoding];
-		storageDir = [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
-		cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] cStringUsingEncoding:NSASCIIStringEncoding];
-		
+		char* s;
+
+		asprintf(&s, "%s", [[[NSBundle mainBundle] resourcePath] UTF8String]);
+		resourceDir = s;
+
+		asprintf(&s, "%s", [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] UTF8String]);
+		storageDir = s;
+
+		asprintf(&s, "%s", [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] UTF8String]);
+		cacheDir = s;
+        
 		_view = self;
 		_backspace = (string_t)malloc(1);
 		gdt_hook_initialize();
-		_w = CGRectGetWidth(frame);
-		_h = CGRectGetHeight(frame);
+		_w = CGRectGetWidth(frame) * self.contentScaleFactor;
+		_h = CGRectGetHeight(frame) * self.contentScaleFactor;
 		gdt_hook_visible(true);
 		_visible = true;
 		
@@ -278,8 +289,9 @@ uint64_t gdt_time_ns(void) {
 -(void)handleTouches:(NSSet*)touches withType:(touch_type_t)type 
 {
 	if (touch_cb) {
+		CGFloat scale = self.contentScaleFactor;
 		CGPoint where = [[touches anyObject] locationInView:self];
-		touch_cb(type, where.x, _h-where.y);	
+		touch_cb(type, where.x * scale, _h - where.y * scale);	
 	}
 }
 
