@@ -245,6 +245,18 @@ uint64_t gdt_time_ns(void) {
 		
 		[ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
 		
+		GLint backingWidth, backingHeight;
+		GLuint depthRb;
+		
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
+		glGenRenderbuffers(1, &depthRb);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthRb);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backingWidth, backingHeight);
+		
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRb);
+		glBindRenderbuffer(GL_RENDERBUFFER, rb);
+		
 		char* s;
 
 		asprintf(&s, "%s", [[[NSBundle mainBundle] resourcePath] UTF8String]);
