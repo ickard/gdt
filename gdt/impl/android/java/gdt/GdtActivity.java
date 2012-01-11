@@ -50,7 +50,7 @@ import android.view.inputmethod.InputMethodManager;
 
 public abstract class GdtActivity extends Activity {
 	private GdtView _view;
-	
+	 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);		 

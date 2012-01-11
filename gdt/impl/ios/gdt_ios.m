@@ -1,5 +1,5 @@
 /*
- * GdtView.m
+ * gdt_ios.m
  *
  * Copyright (c) 2011 Rickard Edström
  * Copyright (c) 2011 Sebastian Ärleryd
@@ -23,7 +23,8 @@
  * THE SOFTWARE.
  */
 
-#import "GdtView.h"
+#import <UIKit/UIKit.h>
+
 #include "gdt.h"
 #include "gdt_ios.h"
 #import <OpenGLES/EAGLDrawable.h> 
@@ -36,6 +37,24 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <sys/time.h>
+#import <UIKit/UIKit.h>
+#include <OpenGLES/ES2/glext.h>
+
+@interface GdtView : UIView<UIKeyInput> {
+	@private EAGLContext* ctx; 
+}
+-(void)drawView:(CADisplayLink*)_;
+-(void)visible:(BOOL)makeVisible;
+@end
+
+
+@interface GdtAppDelegate : NSObject <UIApplicationDelegate,UIAccelerometerDelegate> {
+	@private GdtView*	 view;
+	@private UIWindow* window;
+}
+@end
+
+
 
 GdtView* _view = NULL;
 touchhandler_t touch_cb = NULL;
@@ -47,6 +66,18 @@ static bool _visible = false;
 static int _w = -1;
 static int _h = -1;
 static string_t _backspace;
+
+
+static GdtAppDelegate* _instance = nil;
+static accelerometerhandler_t cb_accelerometer = NULL;
+
+void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event) {
+	cb_accelerometer = on_accelerometer_event;
+	
+	UIAccelerometer* a = [UIAccelerometer sharedAccelerometer];
+	
+	a.delegate = on_accelerometer_event ? _instance : nil;
+}
 
 int32_t gdt_surface_width(void) {
 	return _w;
@@ -75,7 +106,7 @@ static NSString* logTypeToFormatString(log_type_t type) {
 
 void gdt_logv(log_type_t type, string_t tag, string_t format, va_list args) {
 	NSString* s = [NSString stringWithFormat:logTypeToFormatString(type), tag, format];
-		
+	
 	NSLogv(s, args);	 
 }
 
@@ -105,12 +136,12 @@ void gdt_set_callback_touch(touchhandler_t f) {
 }
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode) {
 	switch(mode) {
-	case KBD_VISIBLE:
-		[_view becomeFirstResponder];
-		break;
-	case KBD_HIDDEN:
-		[_view resignFirstResponder];
-		break;
+		case KBD_VISIBLE:
+			[_view becomeFirstResponder];
+			break;
+		case KBD_HIDDEN:
+			[_view resignFirstResponder];
+			break;
 	};
 }
 
@@ -142,7 +173,7 @@ resource_t gdt_resource_load(string_t resourcePath) {
 	res->len = info.st_size;
 	res->data = mmap(NULL, res->len, PROT_READ, MAP_PRIVATE, fd, 0);
 	close(fd);
-
+	
 	return res;
 }
 
@@ -166,7 +197,7 @@ audioplayer_t gdt_audioplayer_create(string_t p) {
 	
 	if(player == nil)
 		return NULL;
-		
+	
 	[player prepareToPlay];
 	
 	audioplayer_t ap = (audioplayer_t)malloc(sizeof(struct audioplayer));
@@ -239,9 +270,9 @@ uint64_t gdt_time_ns(void) {
 		glBindRenderbuffer(GL_RENDERBUFFER, rb);
 		
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-									 GL_COLOR_ATTACHMENT0,
-									 GL_RENDERBUFFER,
-									 rb);
+								  GL_COLOR_ATTACHMENT0,
+								  GL_RENDERBUFFER,
+								  rb);
 		
 		[ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
 		
@@ -277,7 +308,7 @@ uint64_t gdt_time_ns(void) {
 		_visible = true;
 		
 		CADisplayLink* link = [CADisplayLink displayLinkWithTarget:self
-											 selector:@selector(drawView:)];
+														  selector:@selector(drawView:)];
 		[link addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 	}
 	
@@ -347,3 +378,70 @@ uint64_t gdt_time_ns(void) {
 }
 
 @end
+
+
+
+@implementation GdtAppDelegate
+
+-(void)applicationDidBecomeActive:(UIApplication*)_
+{
+	gdt_hook_active();
+}
+
+-(void)applicationWillResignActive:(UIApplication*)_
+{
+	gdt_hook_inactive();
+}
+
+-(void)applicationWillEnterForeground:(UIApplication*)_
+{
+	[view visible:YES];
+}
+
+-(void)applicationDidEnterBackground:(UIApplication*)_
+{
+	[view visible:NO];
+	gdt_hook_save_state();
+}
+
+-(void)accelerometer:(UIAccelerometer*)_ didAccelerate:(UIAcceleration*)a {
+	static accelerometer_data_t v;
+	if (cb_accelerometer) {
+		v.x = a.x;
+		v.y = a.y;
+		v.z = a.z;
+		v.time = a.timestamp;
+		cb_accelerometer(&v);
+	}
+}
+
+-(void)applicationDidFinishLaunching :(UIApplication*) _
+{
+	_instance = self;
+	
+	CGRect bounds = [[UIScreen mainScreen] bounds];
+	window = [[UIWindow alloc] initWithFrame:bounds];
+	view = [[GdtView alloc] initWithFrame: bounds];
+	
+	[window addSubview:view];
+	[window makeKeyAndVisible];
+}
+
+-(void)dealloc
+{
+	[view release];
+	[window release];
+	[super dealloc];
+}
+
+@end
+
+
+
+
+int main(int argc, char** argv) {
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	int r = UIApplicationMain(argc, argv, nil, @"GdtAppDelegate");
+	[pool release];
+	return r;
+}

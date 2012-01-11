@@ -83,6 +83,7 @@ static GLuint compileShader(string_t shaderCode, GLenum type) {
 
 	return shader;
 }
+
 static GLuint linkProgram() {
 	GLuint vertexShader = compileShader(simpleVertexShader, GL_VERTEX_SHADER);
 	GLuint fragmentShader = compileShader(redFragmentShader, GL_FRAGMENT_SHADER);
@@ -102,8 +103,6 @@ static GLuint linkProgram() {
 
 	return program;
 }
-
-
 
 static bool inside_the_square(float x, float y) {
 	return (x > _x && x < (_x + SIZE)) && (y > _y && y < (_y + SIZE));
@@ -147,7 +146,6 @@ static bool save_state() {
 	fclose(file);
 	return count == 1;
 }
-
 
 
 static void on_touch(touch_type_t what, int screenX, int screenY) {
