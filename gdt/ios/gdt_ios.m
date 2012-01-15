@@ -25,8 +25,7 @@
 
 #import <UIKit/UIKit.h>
 
-#include "gdt.h"
-#include "gdt_ios.h"
+#include <gdt/gdt.h>
 #import <OpenGLES/EAGLDrawable.h> 
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
@@ -53,8 +52,6 @@
 	@private UIWindow* window;
 }
 @end
-
-
 
 GdtView* _view = NULL;
 touchhandler_t touch_cb = NULL;

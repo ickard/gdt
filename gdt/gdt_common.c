@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "gdt.h"
+#include <gdt/gdt.h>
 
 void gdt_log(log_type_t type, string_t tag, string_t format, ...) {
     va_list args;

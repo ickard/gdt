@@ -27,7 +27,7 @@
 #include <jni.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "gdt_android.h"
+#include <gdt/gdt.h>
 #include "sys/time.h"
 
 

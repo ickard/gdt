@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-#include "gdt/gdt.h"
-#include "gdt/gdt_gles2.h"
+#include <gdt/gdt.h>
+#include <gdt/gdt_gles2.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
