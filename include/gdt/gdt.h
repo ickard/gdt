@@ -46,30 +46,31 @@ typedef int bool;
 #endif
 #endif
 
+
 typedef const char* string_t;
 
+
 typedef enum {
-  KBD_HIDDEN,
-  KBD_PORTRAIT,
-  KBD_LANDSCAPE
+	KBD_HIDDEN,
+	KBD_VISIBLE
 } keyboard_mode_t;
 
 typedef enum {
-  TOUCH_DOWN,
-  TOUCH_UP,
-  TOUCH_MOVE
+	TOUCH_DOWN,
+	TOUCH_UP,
+	TOUCH_MOVE
 } touch_type_t;
 
 typedef enum {
-  LOG_DEBUG,
-  LOG_NORMAL,
-  LOG_WARNING,
-  LOG_ERROR
+	LOG_DEBUG,
+	LOG_NORMAL,
+	LOG_WARNING,
+	LOG_ERROR
 } log_type_t;
 
 typedef enum {
-  EXIT_SUCCEED,
-  EXIT_FAIL
+	EXIT_SUCCEED,
+	EXIT_FAIL
 } exit_type_t;
 
 struct resource;
@@ -78,7 +79,16 @@ typedef struct resource* resource_t;
 struct audioplayer;
 typedef struct audioplayer* audioplayer_t;
 
+typedef struct {
+	float x;
+	float y;
+	float z;
+	double time; // in seconds
+} accelerometer_data_t; 
+
+typedef void (*accelerometerhandler_t)(accelerometer_data_t*);
 typedef void (*touchhandler_t)(touch_type_t, int, int);
+typedef void (*texthandler_t)(string_t);
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,21 +113,22 @@ extern "C" {
 void gdt_hook_initialize(void);
 
 /* gdt_hook_visible -- Called when the game has become visible and an OpenGL
- *                     ES surface is ready with the specified dimensions
+ *                     ES surface is ready for use.
  * 
- * newSurface is true if the surface is new 
+ * The newContext is used to determine if the OpenGL context is freshly created.
+ * The results of gdt_surface_{width/height}() can change only
+ * iff newContext == true
  *
  * This is called
  *   - shortly after gdt_hook_initialize()
- *   - when game has been running in background
- *     and has just returned to foreground
- *   - if the surface is resized
+ *   - when game has been hidden in the background
+ *     and has just become visible once again
  * Example of things to run here:
- *   - If you have extra threads for game logic, enable them here
- *   - If newSurface is true, prepare the gl environment
+ *   - If you have extra threads for game logic, maybe enable them here
+ *   - If newContext is true, prepare the gl environment
  *   - glViewport, and other size related operations
  */
-void gdt_hook_visible(bool newSurface, int32_t surfaceWidth, int32_t surfaceHeight);
+void gdt_hook_visible(bool newContext);
 
 /* gdt_hook_active -- The game is in the foreground, it has the focus.
  *
@@ -139,7 +150,7 @@ void gdt_hook_render(void);
  * Things to do:
  *   - Pause the game, and add something like a nice "Paused" screen
  *     so the player can touch to resume when the
- *     game is back in foreground again later.
+ *     game gets the focus once again.
  *   - Maybe mute the sound if you unmute it in gdt_hook_active()
  * This roughly corresponds to:
  *  Android: onPause
@@ -180,6 +191,9 @@ void gdt_hook_hidden(void);
  */
  
 void gdt_set_callback_touch(touchhandler_t on_touch);
+void gdt_set_callback_text(texthandler_t on_text_input);
+void gdt_set_callback_accelerometer(accelerometerhandler_t on_accelerometer_event);
+
 
 // ------------------------------------
 
@@ -192,15 +206,23 @@ void gdt_set_callback_touch(touchhandler_t on_touch);
  */
 void gdt_gc_hint(void);
 
+int32_t gdt_surface_width(void);
+int32_t gdt_surface_height(void);
+	
 // Return the time in nanoseconds at the highest precision available.
 uint64_t gdt_time_ns(void);
 void gdt_set_virtual_keyboard_mode(keyboard_mode_t mode);
-void gdt_open_url                 (string_t url);
+
+// Special string that represents backspace
+string_t gdt_backspace(void);
+
+void gdt_open_url(string_t url);
     
-void gdt_log                      (log_type_t type,    string_t tag,
-								   string_t format, ...);
-void gdt_logv                     (log_type_t type,    string_t tag,
-								   string_t format, va_list args);
+void gdt_log     (log_type_t type  ,  string_t tag,
+                  string_t   format,           ...);
+
+void gdt_logv    (log_type_t type  ,  string_t tag,
+                  string_t   format,  va_list  args);
 
 // Log (as LOG_ERROR), and then exit with EXIT_FAIL
 void gdt_fatal(string_t tag, string_t format, ...);
@@ -246,9 +268,9 @@ void       gdt_resource_unload(resource_t resource);
  */
 
 audioplayer_t gdt_audioplayer_create(string_t resourcePath);
-void gdt_audioplayer_destroy(audioplayer_t player);
-bool gdt_audioplayer_play(audioplayer_t player);
-/*
+void          gdt_audioplayer_destroy(audioplayer_t player);
+bool          gdt_audioplayer_play(audioplayer_t player);
+/* 
 bool gdt_audioplayer_change_source(audioplayer_t player, string_t resourcePath);
 bool gdt_audioplayer_pause(audioplayer_t player);
 bool gdt_audioplayer_set_position(audioplayer_t player, double seconds);

@@ -1,5 +1,5 @@
 /*
- * GdtAppDelegate.h
+ * gdt_common.c
  *
  * Copyright (c) 2011 Rickard Edström
  *
@@ -22,12 +22,24 @@
  * THE SOFTWARE.
  */
 
-#import "GdtView.h"
-#import <UIKit/UIKit.h>
+#include <gdt/gdt.h>
 
-@interface GdtAppDelegate : NSObject <UIApplicationDelegate> {
-  @private GdtView*   view;
-  @private UIWindow* window;
+void gdt_log(log_type_t type, string_t tag, string_t format, ...) {
+    va_list args;
+    va_start(args, format);
+    
+    gdt_logv(type, tag, format, args);
+    
+    va_end(args);
 }
 
-@end
+void gdt_fatal(string_t tag, string_t format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    gdt_logv(LOG_ERROR, tag, format, args);
+
+    va_end(args);  
+    
+    gdt_exit(EXIT_FAIL);
+}
