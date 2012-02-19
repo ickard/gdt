@@ -186,7 +186,7 @@ resource_t gdt_resource_load(string_t p) {
 void gdt_resource_unload(resource_t res) {
   jobject arr = res->extra;
 
-  (*env)->CallStaticObjectMethod(env, cls, cleanAsset, arr);
+  (*env)->CallStaticBooleanMethod(env, cls, cleanAsset, arr);
   (*env)->DeleteGlobalRef(env, arr);
   
   free(res);
