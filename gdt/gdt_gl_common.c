@@ -1,7 +1,7 @@
 /*
- * gdt_gles2.h
+ * gdt_gl_common.c
  *
- * Copyright (c) 2011 Rickard Edström
+ * Copyright (c) 2011 Sebastian Ärleryd
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,23 @@
  * THE SOFTWARE.
  */
 
-#ifndef gles2_h
-#define gles2_h
+#include <gdt/gdt_gles2.h>
 
-#include "gdt.h"
-
-#ifdef GDT_PLATFORM_ANDROID
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#endif
-
-#ifdef GDT_PLATFORM_IOS
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-string_t gdt_gl_error_string(GLenum error);
-
-#ifdef __cplusplus
+string_t gdt_gl_error_string(GLenum error) {
+	switch(error) {
+	case GL_NO_ERROR:
+		return "GL_NO_ERROR";
+	case GL_INVALID_ENUM:
+		return "GL_INVALID_ENUM";
+	case GL_INVALID_VALUE:
+		return "GL_INVALID_VALUE";
+	case GL_INVALID_OPERATION:
+		return "GL_INVALID_OPERATION";
+	case GL_INVALID_FRAMEBUFFER_OPERATION:
+		return "GL_INVALID_FRAMEBUFFER_OPERATION";
+	case GL_OUT_OF_MEMORY:
+		return "GL_OUT_OF_MEMORY";
+	default:
+		return NULL;
+	}
 }
-#endif // cplusplus
-
-#endif // gles2_h
