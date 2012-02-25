@@ -37,14 +37,4 @@
 #include <OpenGLES/ES2/glext.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-string_t gdt_gl_error_string(GLenum error);
-
-#ifdef __cplusplus
-}
-#endif // cplusplus
-
 #endif // gles2_h
